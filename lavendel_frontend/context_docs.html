@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Context Docs Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 5px;
+            margin: 5px 0;
+        }
+        button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Context Docs Manager</h1>
+    
+    <form id="contextDocForm">
+        <input type="hidden" id="docId">
+        <input type="text" id="url" placeholder="URL" required>
+        <input type="text" id="documentName" placeholder="Document Name" required>
+        <textarea id="documentText" placeholder="Document Text" required></textarea>
+        <button type="submit">Add/Update Context Doc</button>
+    </form>
+
+    <table id="contextDocsTable">
+        <thead>
+            <tr>
+                <th>URL</th>
+                <th>Document Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+        const form = document.getElementById('contextDocForm');
+        const table = document.getElementById('contextDocsTable').getElementsByTagName('tbody')[0];
+
+        // Fetch and display all context docs
+        function fetchContextDocs() {
+            fetch(`${API_URL}/context_docs`)
+                .then(response => response.json())
+                .then(data => {
+                    table.innerHTML = '';
+                    data.forEach(doc => {
+                        const row = table.insertRow();
+                        row.innerHTML = `
+                            <td>${doc.url}</td>
+                            <td>${doc.document_name}</td>
+                            <td>
+                                <button onclick="editDoc(${doc.id})">Edit</button>
+                                <button onclick="deleteDoc(${doc.id})">Delete</button>
+                            </td>
+                        `;
+                    });
+                });
+        }
+
+        // Add or update a context doc
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const docId = document.getElementById('docId').value;
+            const url = document.getElementById('url').value;
+            const documentName = document.getElementById('documentName').value;
+            const documentText = document.getElementById('documentText').value;
+
+            const method = docId ? 'PUT' : 'POST';
+            const endpoint = docId ? `${API_URL}/context_docs/${docId}` : `${API_URL}/context_docs`;
+
+            fetch(endpoint, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url, document_name: documentName, document_text: documentText }),
+            })
+            .then(response => response.json())
+            .then(() => {
+                form.reset();
+                document.getElementById('docId').value = '';
+                fetchContextDocs();
+            });
+        });
+
+        // Edit a context doc
+        function editDoc(id) {
+            window.location.href = `/edit_doc/${id}?id=${id}`;
+        }
+
+        // Delete a context doc
+        function deleteDoc(id) {
+            if (confirm('Are you sure you want to delete this context doc?')) {
+                fetch(`${API_URL}/context_docs/${id}`, {
+                    method: 'DELETE',
+                })
+                .then(() => fetchContextDocs());
+            }
+        }
+
+        // Initial fetch of context docs
+        fetchContextDocs();
+    </script>
+</body>
+</html>
