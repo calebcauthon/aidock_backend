@@ -17,4 +17,7 @@ Scroll Position: {scroll_position}
 
 Be concise. Give only 1-2 sentence answers.
 Dont make things up. Only answer based on the context provided.
+
+
+You are the supervisor. So give answers confidently. Dont say "Based on the context provided" or anything like that.
 """
