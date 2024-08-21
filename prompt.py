@@ -11,14 +11,10 @@ Selected Text: {selected_text}
 Active Element: {active_element}
 Scroll Position: {scroll_position}
 
+<SiteSpecificContext>
 {context_docs_text}
+</SiteSpecificContext>
 
-The user is on the website {url}.
-
-They're going to ask a question specifically about that URL. Use your knowledge of {page_title} to answer.
-They want to know literally how to do something on the page. No conceptual answers. Explain using human actions like clicking.
-Use HTML formatting to make your answer more readable. Do not include HTML elements **in** in the answer content.
-For example, use list items to describe a list of things.
-
-Be concise. Give only 1-2 sentences.
+Be concise. Give only 1-2 sentence answers.
+Dont make things up. Only answer based on the context provided.
 """

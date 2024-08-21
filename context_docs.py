@@ -9,5 +9,5 @@ def get_relevant_context_docs(url: str) -> List[str]:
     rows = cur.fetchall()
     conn.close()
     
-    relevant_docs = [row[1] for row in rows if url in row[0]]
+    relevant_docs = [row[1] for row in rows if row[0] in url]
     return relevant_docs if relevant_docs else []

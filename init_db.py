@@ -18,6 +18,14 @@ def create_table(conn):
                       url TEXT NOT NULL,
                       document_name TEXT NOT NULL,
                       document_text TEXT NOT NULL)''')
+        
+        # Add new table for prompt history
+        c.execute('''CREATE TABLE IF NOT EXISTS prompt_history
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                      url TEXT NOT NULL,
+                      prompt TEXT NOT NULL,
+                      response TEXT NOT NULL)''')
     except Error as e:
         print(e)
 
