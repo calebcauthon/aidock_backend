@@ -1,8 +1,10 @@
 from flask import request, jsonify, Blueprint
 import sqlite3
 from sqlite3 import Error
+from flask import send_from_directory
 
-context_docs = Blueprint('context_docs', __name__)
+context_docs = Blueprint('context_docs', __name__, static_folder='lavendel_frontend')
+
 
 def create_connection():
     conn = None
@@ -70,3 +72,32 @@ def delete_context_doc(doc_id):
     conn.close()
     
     return jsonify({"message": "Context document deleted successfully"})
+
+
+@context_docs.route('/edit_doc/<int:doc_id>')
+def edit_doc_page(doc_id):
+    return send_from_directory(context_docs.static_folder, 'edit_doc.html')
+
+@context_docs.route('/docs')
+def serve_docs():
+    return send_from_directory(context_docs.static_folder, 'context_docs.html')
+
+@context_docs.route('/<int:doc_id>', methods=['GET'])
+def get_context_doc(doc_id):
+    conn = create_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM context_docs WHERE id=?", (doc_id,))
+    doc = cur.fetchone()
+    conn.close()
+    
+    if doc:
+        doc_data = {
+            "id": doc[0],
+            "url": doc[1],
+            "document_name": doc[2],
+            "document_text": doc[3]
+        }
+        return jsonify(doc_data)
+    else:
+        return jsonify({"error": "Document not found"}), 404
+

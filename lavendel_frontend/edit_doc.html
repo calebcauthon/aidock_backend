@@ -42,19 +42,19 @@
         <button type="submit">Update Context Doc</button>
     </form>
 
-    <button onclick="window.location.href='/docs'">Back to Context Docs</button>
+    <button onclick="window.location.href='/context_docs/docs'">Back to Context Docs</button>
 
     <script>
-        const API_URL = 'http://localhost:5000';
+        const API_URL = '/context_docs';
         const form = document.getElementById('editDocForm');
         const docId = new URLSearchParams(window.location.search).get('id');
 
         // Fetch the context doc data
         function fetchDocData() {
-            fetch(`${API_URL}/context_docs`)
+            fetch(`${API_URL}/${docId}`)
                 .then(response => response.json())
                 .then(data => {
-                    const doc = data.find(d => d.id === parseInt(docId));
+                    const doc = data;
                     if (doc) {
                         document.getElementById('docId').value = doc.id;
                         document.getElementById('url').value = doc.url;
@@ -62,7 +62,7 @@
                         document.getElementById('documentText').value = doc.document_text;
                     } else {
                         alert('Document not found');
-                        window.location.href = '/docs';
+                        window.location.href = '/context_docs/docs';
                     }
                 });
         }
@@ -74,7 +74,7 @@
             const documentName = document.getElementById('documentName').value;
             const documentText = document.getElementById('documentText').value;
 
-            fetch(`${API_URL}/context_docs/${docId}`, {
+            fetch(`${API_URL}/${docId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -84,7 +84,7 @@
             .then(response => response.json())
             .then(() => {
                 alert('Context document updated successfully');
-                window.location.href = '/docs';
+                window.location.href = '/context_docs/docs';
             });
         });
 

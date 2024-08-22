@@ -80,13 +80,7 @@ def prompt_history():
     else:
         return jsonify({"error": "Unable to connect to the database"}), 500
 
-@app.route('/edit_doc/<int:doc_id>')
-def edit_doc_page(doc_id):
-    return send_from_directory(app.static_folder, 'edit_doc.html')
 
-@app.route('/docs')
-def serve_docs():
-    return send_from_directory(app.static_folder, 'context_docs.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
