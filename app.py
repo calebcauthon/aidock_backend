@@ -111,7 +111,5 @@ def prompt_history():
     else:
         return jsonify({"error": "Unable to connect to the database"}), 500
 
-
-
 if __name__ == '__main__':
     app.run(debug=True)

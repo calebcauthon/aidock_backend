@@ -2,9 +2,10 @@ from flask import request, jsonify, Blueprint
 import sqlite3
 from sqlite3 import Error
 from flask import send_from_directory
+from flask_cors import CORS
 
 context_docs = Blueprint('context_docs', __name__, static_folder='lavendel_frontend')
-
+CORS(context_docs)
 
 def create_connection():
     conn = None
@@ -24,6 +25,42 @@ def get_context_docs():
     conn.close()
     return jsonify([{"id": row[0], "url": row[1], "document_name": row[2], "document_text": row[3]} for row in rows])
 
+
+"""
+@api {post} / Add a new context document
+@apiName AddContextDoc
+@apiGroup ContextDocs
+
+@apiParam {String} url The URL associated with the context document.
+@apiParam {String} document_name The name of the context document.
+@apiParam {String} document_text The text content of the context document.
+
+@apiSuccess {Number} id The ID of the newly created context document.
+@apiSuccess {String} message Success message.
+
+@apiError {String} error Error message indicating missing required fields.
+
+@apiExample {json} Request-Example:
+    {
+        "url": "http://example.com",
+        "document_name": "Example Document",
+        "document_text": "This is an example document text."
+    }
+
+@apiSuccessExample {json} Success-Response:
+    HTTP/1.1 201 Created
+    {
+        "id": 1,
+        "message": "Context document added successfully"
+    }
+
+@apiErrorExample {json} Error-Response:
+    HTTP/1.1 400 Bad Request
+    {
+        "error": "Missing required fields"
+    }
+"""
+
 @context_docs.route('/', methods=['POST'])
 def add_context_doc():
     data = request.get_json()
@@ -31,8 +68,16 @@ def add_context_doc():
     document_name = data.get('document_name')
     document_text = data.get('document_text')
     
-    if not all([url, document_name, document_text]):
-        return jsonify({"error": "Missing required fields"}), 400
+    missing_fields = []
+    if not url:
+        missing_fields.append("url")
+    if not document_name:
+        missing_fields.append("document_name")
+    if not document_text:
+        missing_fields.append("document_text")
+    
+    if missing_fields:
+        return jsonify({"error": f"Missing required fields: {', '.join(missing_fields)}"}), 400
     
     conn = create_connection()
     cur = conn.cursor()
@@ -72,7 +117,6 @@ def delete_context_doc(doc_id):
     conn.close()
     
     return jsonify({"message": "Context document deleted successfully"})
-
 
 @context_docs.route('/edit_doc/<int:doc_id>')
 def edit_doc_page(doc_id):
