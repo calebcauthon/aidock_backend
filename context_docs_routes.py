@@ -145,3 +145,21 @@ def get_context_doc(doc_id):
     else:
         return jsonify({"error": "Document not found"}), 404
 
+@context_docs.route('/<int:doc_id>', methods=['DELETE'])
+def delete_context_document(doc_id):
+    conn = create_connection()
+    if conn is not None:
+        try:
+            c = conn.cursor()
+            c.execute('DELETE FROM context_docs WHERE id = ?', (doc_id,))
+            conn.commit()
+            if c.rowcount > 0:
+                return jsonify({"success": True, "message": "Document deleted successfully"})
+            else:
+                return jsonify({"success": False, "error": "Document not found"}), 404
+        except sqlite3.Error as e:
+            return jsonify({"success": False, "error": str(e)}), 500
+        finally:
+            conn.close()
+    else:
+        return jsonify({"success": False, "error": "Unable to connect to the database"}), 500
