@@ -151,4 +151,5 @@ def get_context_document(doc_id):
         return jsonify({"error": "Unable to connect to the database"}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=True, port=port)
