@@ -5,8 +5,9 @@ from flask_cors import CORS
 from prompt import get_system_prompt
 from context_docs_routes import context_docs, create_connection
 from init_db import create_table
-import sqlite3
 from datetime import datetime
+import psycopg2
+from psycopg2 import sql
 
 app = Flask(__name__, static_folder='lavendel_frontend')
 app.template_folder = 'lavendel_frontend'
@@ -15,6 +16,16 @@ app.jinja_env.variable_end_string = ']]'
 
 CORS(app)
 client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+
+# Database connection function
+def create_connection():
+    db_url = os.environ.get("DATABASE_URL")
+    if db_url and db_url.startswith("postgres"):
+        return psycopg2.connect(db_url)
+    else:
+        # Fallback to SQLite
+        import sqlite3
+        return sqlite3.connect('lavendel.db')
 
 # Initialize database
 conn = create_connection()
@@ -89,9 +100,11 @@ def ask_claude():
         # Save prompt and response to history
         conn = create_connection()
         if conn is not None:
-            c = conn.cursor()
-            c.execute('''INSERT INTO prompt_history (url, prompt, response)
-                         VALUES (?, ?, ?)''', (url, f"SYSTEM PROMPT: {system_prompt} | USER QUESTION: {question}", answer))
+            with conn.cursor() as cur:
+                cur.execute(
+                    sql.SQL("INSERT INTO prompt_history (url, prompt, response) VALUES (%s, %s, %s)"),
+                    (url, f"SYSTEM PROMPT: {system_prompt} | USER QUESTION: {question}", answer)
+                )
             conn.commit()
             conn.close()
 
@@ -103,9 +116,9 @@ def ask_claude():
 def prompt_history():
     conn = create_connection()
     if conn is not None:
-        c = conn.cursor()
-        c.execute('''SELECT * FROM prompt_history ORDER BY timestamp DESC''')
-        history = c.fetchall()
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM prompt_history ORDER BY timestamp DESC")
+            history = cur.fetchall()
         conn.close()
         return render_template('prompt_history.html', history=history)
     else:
@@ -116,21 +129,21 @@ def get_context_document(doc_id):
     conn = create_connection()
     if conn is not None:
         try:
-            c = conn.cursor()
-            c.execute('SELECT * FROM context_docs WHERE id = ?', (doc_id,))
-            doc = c.fetchone()
-            if doc:
-                return jsonify({
-                    'id': doc[0],
-                    'url': doc[1],
-                    'document_name': doc[2],
-                    'document_text': doc[3],
-                    'scope': doc[4],  # Assuming you have a scope column
-                    # Add other fields as necessary
-                })
-            else:
-                return jsonify({"error": "Document not found"}), 404
-        except sqlite3.Error as e:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM context_docs WHERE id = %s", (doc_id,))
+                doc = cur.fetchone()
+                if doc:
+                    return jsonify({
+                        'id': doc[0],
+                        'url': doc[1],
+                        'document_name': doc[2],
+                        'document_text': doc[3],
+                        'scope': doc[4],  # Assuming you have a scope column
+                        # Add other fields as necessary
+                    })
+                else:
+                    return jsonify({"error": "Document not found"}), 404
+        except (psycopg2.Error) as e:
             return jsonify({"error": str(e)}), 500
         finally:
             conn.close()

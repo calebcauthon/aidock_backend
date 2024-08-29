@@ -3,18 +3,9 @@ import sqlite3
 from sqlite3 import Error
 from flask import send_from_directory
 from flask_cors import CORS
-
+from init_db import create_connection
 context_docs = Blueprint('context_docs', __name__, static_folder='lavendel_frontend')
 CORS(context_docs)
-
-def create_connection():
-    conn = None
-    try:
-        conn = sqlite3.connect('context_docs.db')
-        return conn
-    except Error as e:
-        print(e)
-    return conn
 
 @context_docs.route('/', methods=['GET'])
 def get_context_docs():
@@ -81,7 +72,7 @@ def add_context_doc():
     
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("INSERT INTO context_docs (url, document_name, document_text) VALUES (?, ?, ?)",
+    cur.execute("INSERT INTO context_docs (url, document_name, document_text) VALUES (%s, %s, %s)",
                 (url, document_name, document_text))
     conn.commit()
     new_id = cur.lastrowid
@@ -101,7 +92,7 @@ def update_context_doc(doc_id):
     
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("UPDATE context_docs SET url=?, document_name=?, document_text=? WHERE id=?",
+    cur.execute("UPDATE context_docs SET url=%s, document_name=%s, document_text=%s WHERE id=%s",
                 (url, document_name, document_text, doc_id))
     conn.commit()
     conn.close()
@@ -112,7 +103,7 @@ def update_context_doc(doc_id):
 def delete_context_doc(doc_id):
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("DELETE FROM context_docs WHERE id=?", (doc_id,))
+    cur.execute("DELETE FROM context_docs WHERE id=%s", (doc_id,))
     conn.commit()
     conn.close()
     
@@ -130,7 +121,7 @@ def serve_docs():
 def get_context_doc(doc_id):
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM context_docs WHERE id=?", (doc_id,))
+    cur.execute("SELECT * FROM context_docs WHERE id=%s", (doc_id,))
     doc = cur.fetchone()
     conn.close()
     
@@ -151,7 +142,7 @@ def delete_context_document(doc_id):
     if conn is not None:
         try:
             c = conn.cursor()
-            c.execute('DELETE FROM context_docs WHERE id = ?', (doc_id,))
+            c.execute('DELETE FROM context_docs WHERE id = %s', (doc_id,))
             conn.commit()
             if c.rowcount > 0:
                 return jsonify({"success": True, "message": "Document deleted successfully"})
