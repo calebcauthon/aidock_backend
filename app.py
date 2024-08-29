@@ -82,11 +82,20 @@ def ask_claude():
     selected_text = data.get('selectedText')
     active_element = data.get('activeElement')
     scroll_position = data.get('scrollPosition')
+    conversation_messages = data.get('conversationMessages', [])
 
     if not question:
         return jsonify({"error": "No question provided"}), 400
     try:
         system_prompt = get_system_prompt(url, page_title, selected_text, active_element, scroll_position)
+        
+        # Add conversation context to the system prompt
+        conversation_context = "\n\nPrevious conversation:\n"
+        for msg in conversation_messages:
+            conversation_context += f"{msg['type'].capitalize()}: {msg['content']}\n"
+        
+        system_prompt += conversation_context
+
         response = client.messages.create(
             model="claude-3-sonnet-20240229",
             max_tokens=1000,
