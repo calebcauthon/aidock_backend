@@ -1,0 +1,8 @@
+## Project Structure:
+* Chrome Extension, with a backend API server for data and inference
+* Backend folder is lavendel_backend, contains python project running a flask server, and a UI for CRUD operations
+
+## General Coding Tips
+* Coding Guidelines: 
+  * Functions should be just a few lines long and call a few single-purpose functions
+  * Function names should read like english, e.g., countTheNumberOfPeopleInTheGroup(group) instead of getCount(group)
