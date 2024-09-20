@@ -15,28 +15,28 @@ def create_connection():
 
 def create_table(conn):
     try:
-        with conn.cursor() as cur:
-            # Create context_docs table
-            cur.execute(sql.SQL("""
-                CREATE TABLE IF NOT EXISTS context_docs (
-                    id SERIAL PRIMARY KEY,
-                    url TEXT NOT NULL,
-                    document_name TEXT NOT NULL,
-                    document_text TEXT NOT NULL
-                )
-            """))
-            
-            # Create prompt_history table
-            cur.execute(sql.SQL("""
-                CREATE TABLE IF NOT EXISTS prompt_history (
-                    id SERIAL PRIMARY KEY,
-                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    url TEXT NOT NULL,
-                    prompt TEXT NOT NULL,
-                    response TEXT NOT NULL
-                )
-            """))
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS context_docs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                url TEXT NOT NULL,
+                document_name TEXT NOT NULL,
+                document_text TEXT NOT NULL
+            )
+        """)
+        
+        # Create prompt_history table
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS prompt_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                url TEXT NOT NULL,
+                prompt TEXT NOT NULL,
+                response TEXT NOT NULL
+            )
+        """)
         conn.commit()
+        cur.close()
     except (sqlite3.Error, psycopg2.Error) as e:
         print(f"Database error: {e}")
 

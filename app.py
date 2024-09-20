@@ -132,6 +132,13 @@ def get_context_document(doc_id):
     else:
         return jsonify({"error": "Unable to connect to the database"}), 500
 
+@app.route('/authenticate', methods=['POST'])
+def authenticate():
+    return jsonify({
+        "status": "success",
+        "message": "Authentication successful"
+    }), 200
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=True, port=port)
