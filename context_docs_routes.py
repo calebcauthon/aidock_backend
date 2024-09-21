@@ -19,7 +19,6 @@ def get_context_docs():
     conn.close()
     return jsonify([{"id": row[0], "url": row[1], "document_name": row[2], "document_text": row[3], "organization_id": row[4]} for row in rows])
 
-
 @context_docs.route('/', methods=['POST'])
 @platform_admin_required
 def add_context_doc():
@@ -27,6 +26,7 @@ def add_context_doc():
     url = data.get('url')
     document_name = data.get('document_name')
     document_text = data.get('document_text')
+    organization_id = data.get('organization_id')
     
     missing_fields = []
     if not url:
@@ -36,13 +36,17 @@ def add_context_doc():
     if not document_text:
         missing_fields.append("document_text")
     
+    if not organization_id:
+        missing_fields.append("organization_id")
+    
     if missing_fields:
         return jsonify({"error": f"Missing required fields: {', '.join(missing_fields)}"}), 400
+
     
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("INSERT INTO context_docs (url, document_name, document_text) VALUES (?, ?, ?)",
-                (url, document_name, document_text))
+    cur.execute("INSERT INTO context_docs (url, document_name, document_text, organization_id) VALUES (?, ?, ?, ?)",
+                (url, document_name, document_text, organization_id))
     conn.commit()
 
     new_id = cur.lastrowid
@@ -98,7 +102,7 @@ def serve_docs():
 def get_context_doc(doc_id):
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM context_docs WHERE id=?", (doc_id,))
+    cur.execute("SELECT id, url, document_name, document_text, organization_id FROM context_docs WHERE id=?", (doc_id,))
     doc = cur.fetchone()
     conn.close()
 
@@ -108,9 +112,11 @@ def get_context_doc(doc_id):
             "id": doc[0],
             "url": doc[1],
             "document_name": doc[2],
-            "document_text": doc[3]
+            "document_text": doc[3],
+            "organization_id": doc[4]
         }
         return jsonify(doc_data)
+
     else:
         return jsonify({"error": "Document not found"}), 404
 

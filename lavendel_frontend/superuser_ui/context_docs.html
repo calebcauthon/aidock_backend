@@ -49,6 +49,7 @@
         <input type="hidden" id="docId">
         <input type="text" id="url" placeholder="URL" required>
         <input type="text" id="documentName" placeholder="Document Name" required>
+        <input type="text" id="organizationId" placeholder="Organization ID" required>
         <textarea id="documentText" placeholder="Document Text" required></textarea>
         <button type="submit">Add/Update Context Doc</button>
     </form>
@@ -98,6 +99,7 @@
             const url = document.getElementById('url').value;
             const documentName = document.getElementById('documentName').value;
             const documentText = document.getElementById('documentText').value;
+            const organizationId = document.getElementById('organizationId').value;
 
             const method = docId ? 'PUT' : 'POST';
             const endpoint = docId ? `${API_URL}/${docId}` : `${API_URL}/`;
@@ -107,7 +109,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ url, document_name: documentName, document_text: documentText }),
+                body: JSON.stringify({ url, document_name: documentName, document_text: documentText, organization_id: organizationId }),
             })
             .then(response => response.json())
             .then(() => {
