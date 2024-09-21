@@ -1,25 +1,120 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Prompt History</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Timestamp</th>
-                <th>URL</th>
-                <th>Prompt</th>
-                <th>Response</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entry in history %}
-            <tr>
-                <td>[[ entry[1] ]]</td>
-                <td>[[ entry[2] ]]</td>
-                <td><pre>[[ entry[3] ]]</pre></td>
-                <td><pre>[[ entry[4] ]]</pre></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="prompt-history-container">
+        <h1>Prompt History</h1>
+        
+        <div class="pagination">
+            {% if has_prev %}
+                <a href="[[ url_for('prompt_history', offset=prev_offset) ]]" class="pagination-link">Previous</a>
+            {% endif %}
+            {% if has_next %}
+                <a href="[[ url_for('prompt_history', offset=next_offset) ]]" class="pagination-link">Next</a>
+            {% endif %}
+        </div>
+
+        {% if entry %}
+            <div class="prompt-entry">
+                <div class="entry-container">
+                    <p>Timestamp: [[ entry[1] ]]</p>
+                    <p>URL: [[ entry[2] ]]</p>
+                </div>
+
+                <div class="entry-container">
+                    <h2>Response</h2>
+                    <pre>[[ entry[4] ]]</pre>
+                </div>
+
+                <div class="entry-container">
+                    <h2>Full LLM Prompt</h2>
+                    <pre>[[ entry[3] ]]</pre>
+                </div>
+            </div>
+            
+            <div class="pagination">
+                {% if has_prev %}
+                    <a href="[[ url_for('prompt_history', offset=prev_offset) ]]" class="pagination-link">Previous</a>
+                {% endif %}
+                {% if has_next %}
+                    <a href="[[ url_for('prompt_history', offset=next_offset) ]]" class="pagination-link">Next</a>
+                {% endif %}
+            </div>
+        {% else %}
+            <p class="no-history">No prompt history available.</p>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block styles %}
+    [[ super() ]]
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .prompt-history-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .pagination-link {
+            background-color: #3498db;
+            color: #fff;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .pagination-link:hover {
+            background-color: #2980b9;
+        }
+        .entry-container {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .entry-container h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.2em;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 5px;
+        }
+        .entry-container p, .entry-container pre {
+            margin-bottom: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        pre {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .no-history {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+    </style>
 {% endblock %}

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory, render_template
+from flask import Flask, request, jsonify, send_from_directory, render_template, url_for
 
 import os
 import anthropic
@@ -125,14 +125,40 @@ def ask_claude(user):
 
 @app.route('/history')
 def prompt_history():
+    offset = request.args.get('offset', type=int, default=0)
+    limit = 1
+
     conn = create_connection()
     if conn is not None:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM prompt_history ORDER BY timestamp DESC")
-        history = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return render_template('superuser_ui/prompt_history.html', history=history)
+        try:
+            cursor = conn.cursor()
+            
+            # Get total count
+            cursor.execute("SELECT COUNT(*) FROM prompt_history")
+            total_count = cursor.fetchone()[0]
+
+            # Get the current entry
+            cursor.execute("SELECT * FROM prompt_history ORDER BY timestamp DESC LIMIT ? OFFSET ?", (limit, offset))
+            entry = cursor.fetchone()
+
+            cursor.close()
+
+            if entry:
+                has_prev = offset > 0
+                has_next = offset + limit < total_count
+
+                return render_template('superuser_ui/prompt_history.html', 
+                                       entry=entry,
+                                       has_prev=has_prev,
+                                       has_next=has_next,
+                                       prev_offset=max(0, offset - limit),
+                                       next_offset=offset + limit)
+            else:
+                return render_template('superuser_ui/prompt_history.html', entry=None)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+        finally:
+            conn.close()
     else:
         return jsonify({"error": "Unable to connect to the database"}), 500
 
