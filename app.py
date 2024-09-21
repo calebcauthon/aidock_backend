@@ -99,7 +99,8 @@ def ask_claude(user):
     if not question:
         return jsonify({"error": "No question provided"}), 400
     try:
-        system_prompt = get_system_prompt(url, page_title, selected_text, active_element, scroll_position)
+        system_prompt = get_system_prompt(user['organization_id'], url, page_title, selected_text, active_element, scroll_position)
+        system_prompt += f"User: {user}"
         
         # Add conversation context to the system prompt
         conversation_context = "\n\nPrevious conversation:\n"

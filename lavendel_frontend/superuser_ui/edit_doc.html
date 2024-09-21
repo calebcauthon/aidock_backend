@@ -9,12 +9,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Context Doc</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
         form {
             margin-bottom: 20px;
         }
@@ -90,7 +84,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ url, document_name: documentName, document_text: documentText }),
+                body: JSON.stringify({ url, document_name: documentName, document_text: documentText, organization_id: organizationId }),
             })
             .then(response => response.json())
             .then(() => {

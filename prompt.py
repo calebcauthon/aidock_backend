@@ -1,7 +1,7 @@
 from context_docs import get_relevant_context_docs
 
-def get_system_prompt(url, page_title, selected_text, active_element, scroll_position):
-    relevant_docs = get_relevant_context_docs(url)
+def get_system_prompt(organization_id, url, page_title, selected_text, active_element, scroll_position):
+    relevant_docs = get_relevant_context_docs(organization_id, url)
     context_docs_text = "\n\n".join([f"Document Name: {doc['document_name']}\nDocument Text: {doc['document_text']}" for doc in relevant_docs]) if relevant_docs else ""
 
     return f"""

@@ -61,14 +61,15 @@ def update_context_doc(doc_id):
     url = data.get('url')
     document_name = data.get('document_name')
     document_text = data.get('document_text')
+    organization_id = data.get('organization_id')
     
-    if not all([url, document_name, document_text]):
+    if not all([url, document_name, document_text, organization_id]):
         return jsonify({"error": "Missing required fields"}), 400
     
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("UPDATE context_docs SET url=?, document_name=?, document_text=? WHERE id=?",
-                (url, document_name, document_text, doc_id))
+    cur.execute("UPDATE context_docs SET url=?, document_name=?, document_text=?, organization_id=? WHERE id=?",
+                (url, document_name, document_text, organization_id, doc_id))
     conn.commit()
 
     conn.close()
@@ -90,7 +91,6 @@ def delete_context_doc(doc_id):
 @platform_admin_required
 def edit_doc_page(doc_id):
     return render_template('superuser_ui/edit_doc.html', doc_id=doc_id)
-
 
 @context_docs.route('/docs')
 @platform_admin_required
