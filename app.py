@@ -12,6 +12,8 @@ from datetime import datetime
 import psycopg2
 from psycopg2 import sql
 from auth import auth, login_required, platform_admin_required
+from user_model import UserModel
+from functools import wraps
 
 app = Flask(__name__, static_folder='lavendel_frontend')
 app.template_folder = 'lavendel_frontend'
@@ -61,8 +63,30 @@ app.secret_key = os.environ.get("SECRET_KEY", "your_fallback_secret_key")
 def hello_world():
     return "Hello, World!"
 
+def authenticate_user_with_token(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        from flask import request, jsonify
+        from functools import wraps
+        from user_model import UserModel
+
+        print("All headers:")
+        for header, value in request.headers.items():
+            print(f"{header}: {value}")
+        login_token = request.headers.get('login_token')
+        if not login_token:
+            return jsonify({"error": "No login token provided"}), 401
+        
+        user = UserModel.get_user_by_login_token(login_token)
+        if not user:
+            return jsonify({"error": "Invalid login token"}), 401
+        
+        return func(user, *args, **kwargs)
+    return wrapper
+
 @app.route('/ask', methods=['POST'])
-def ask_claude():
+@authenticate_user_with_token
+def ask_claude(user):
     data = request.get_json()
     question = data.get('question')
     url = data.get('url')
@@ -97,12 +121,13 @@ def ask_claude():
         # Save prompt and response to history
         conn = create_connection()
         if conn is not None:
-            with conn.cursor() as cur:
-                cur.execute(
-                    sql.SQL("INSERT INTO prompt_history (url, prompt, response) VALUES (%s, %s, %s)"),
-                    (url, f"SYSTEM PROMPT: {system_prompt} | USER QUESTION: {question}", answer)
-                )
+            cur = conn.cursor()
+            cur.execute(
+                "INSERT INTO prompt_history (url, prompt, response) VALUES (?, ?, ?)",
+                (url, f"SYSTEM PROMPT: {system_prompt} | USER QUESTION: {question}", answer)
+            )
             conn.commit()
+            cur.close()
             conn.close()
 
         return jsonify({"answer": answer})
@@ -113,11 +138,12 @@ def ask_claude():
 def prompt_history():
     conn = create_connection()
     if conn is not None:
-        with conn.cursor() as cur:
-            cur.execute("SELECT * FROM prompt_history ORDER BY timestamp DESC")
-            history = cur.fetchall()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM prompt_history ORDER BY timestamp DESC")
+        history = cursor.fetchall()
+        cursor.close()
         conn.close()
-        return render_template('prompt_history.html', history=history)
+        return render_template('superuser_ui/prompt_history.html', history=history)
     else:
         return jsonify({"error": "Unable to connect to the database"}), 500
 
@@ -126,20 +152,21 @@ def get_context_document(doc_id):
     conn = create_connection()
     if conn is not None:
         try:
-            with conn.cursor() as cur:
-                cur.execute("SELECT * FROM context_docs WHERE id = %s", (doc_id,))
-                doc = cur.fetchone()
-                if doc:
-                    return jsonify({
-                        'id': doc[0],
-                        'url': doc[1],
-                        'document_name': doc[2],
-                        'document_text': doc[3],
-                        'scope': doc[4],  # Assuming you have a scope column
-                        # Add other fields as necessary
-                    })
-                else:
-                    return jsonify({"error": "Document not found"}), 404
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM context_docs WHERE id = ?", (doc_id,))
+            doc = cursor.fetchone()
+            cursor.close()
+            if doc:
+                return jsonify({
+                    'id': doc[0],
+                    'url': doc[1],
+                    'document_name': doc[2],
+                    'document_text': doc[3],
+                    'scope': doc[4],  # Assuming you have a scope column
+                    # Add other fields as necessary
+                })
+            else:
+                return jsonify({"error": "Document not found"}), 404
         except (psycopg2.Error) as e:
             return jsonify({"error": str(e)}), 500
         finally:
