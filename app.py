@@ -11,6 +11,7 @@ from init_db import create_table
 from datetime import datetime
 import psycopg2
 from psycopg2 import sql
+from auth import auth, login_required, platform_admin_required
 
 app = Flask(__name__, static_folder='lavendel_frontend')
 app.template_folder = 'lavendel_frontend'
@@ -49,6 +50,12 @@ from organization_routes import organization_routes  # Add this import
 
 # Register the organization_routes blueprint
 app.register_blueprint(organization_routes, url_prefix='/organizations')
+
+# Register the auth blueprint
+app.register_blueprint(auth)
+
+# Add a secret key for session management
+app.secret_key = os.environ.get("SECRET_KEY", "your_fallback_secret_key")
 
 @app.route('/hello')
 def hello_world():

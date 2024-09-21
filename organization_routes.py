@@ -1,9 +1,11 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for
 from init_db import create_connection, execute_sql
+from auth import platform_admin_required
 
 organization_routes = Blueprint('organization_routes', __name__)
 
 @organization_routes.route('/', methods=['GET'])
+@platform_admin_required
 def list_organizations():
     conn = create_connection()
     if conn is not None:
@@ -15,6 +17,7 @@ def list_organizations():
     return jsonify({"error": "Unable to connect to the database"}), 500
 
 @organization_routes.route('/create', methods=['GET', 'POST'])
+@platform_admin_required
 def create_organization():
     if request.method == 'POST':
         name = request.form.get('name')
@@ -31,6 +34,7 @@ def create_organization():
     return render_template('organizations/create.html')
 
 @organization_routes.route('/<int:org_id>/edit', methods=['GET', 'POST'])
+@platform_admin_required
 def edit_organization(org_id):
     conn = create_connection()
     if conn is not None:
@@ -48,6 +52,7 @@ def edit_organization(org_id):
     return jsonify({"error": "Unable to connect to the database"}), 500
 
 @organization_routes.route('/<int:org_id>/delete', methods=['POST'])
+@platform_admin_required
 def delete_organization(org_id):
     conn = create_connection()
     if conn is not None:

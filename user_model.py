@@ -21,7 +21,7 @@ class UserModel:
         return user if user else None
 
     @staticmethod
-    def create_user(username, email, password, role, organization_id):
+    def create_user(username, email, password, role, organization_id=-1):
         conn = create_connection()
         hashed_password = generate_password_hash(password)
 

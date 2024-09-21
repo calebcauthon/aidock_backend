@@ -2,22 +2,27 @@ from flask import Blueprint, request, jsonify, render_template, redirect, url_fo
 from werkzeug.security import check_password_hash, generate_password_hash
 import uuid
 from user_model import UserModel
+from init_db import create_connection, execute_sql
+from auth import platform_admin_required
 
 user_routes = Blueprint('user_routes', __name__)
 
 @user_routes.route('/', methods=['GET'])
-def get_all_users():
+@platform_admin_required
+def list_users():
     users = UserModel.get_all_users()
-    return render_template('users.html', users=users)
+    return render_template('superuser_ui/users.html', users=users)
 
 @user_routes.route('/<int:user_id>', methods=['GET'])
+
 def get_user(user_id):
     user = UserModel.get_user(user_id)
     if user:
-        return render_template('user_detail.html', user=user)
+        return render_template('superuser_ui/user_detail.html', user=user)
     return jsonify({"error": "User not found"}), 404
 
 @user_routes.route('/create', methods=['GET', 'POST'])
+@platform_admin_required
 def create_user():
     if request.method == 'POST':
         username = request.form.get('username')
@@ -31,14 +36,15 @@ def create_user():
         
         try:
             UserModel.create_user(username, email, password, role, organization_id)
-            return redirect(url_for('user_routes.get_all_users'))
+            return redirect(url_for('user_routes.list_users'))
         except Exception as e:
             return jsonify({"error": str(e)}), 500
     
-    return render_template('create_user.html')
+    return render_template('superuser_ui/create_user.html')
 
 @user_routes.route('/<int:user_id>/edit', methods=['GET', 'POST'])
-def update_user(user_id):
+@platform_admin_required
+def edit_user(user_id):
     user = UserModel.get_user(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
@@ -55,7 +61,7 @@ def update_user(user_id):
         except Exception as e:
             return jsonify({"error": str(e)}), 500
     
-    return render_template('edit_user.html', user=user)
+    return render_template('superuser_ui/edit_user.html', user=user)
 
 @user_routes.route('/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
@@ -96,12 +102,9 @@ def initialize_super_user():
             password = "changeme"
             role = "platform_admin"
             
-            # Hash the password before storing
-            password_hash = generate_password_hash(password)
-            
             # Create the super user
-            UserModel.create_user(username, email, password_hash, role)
-            
+            UserModel.create_user(username, email, password, role)
+
             return jsonify({"message": "Super user initialized successfully"}), 201
         else:
             return jsonify({"message": "Users already exist. Super user not created."}), 400
