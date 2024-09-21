@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for
 from db.init_db import create_connection, execute_sql
-from auth import platform_admin_required
+from routes_authentication_for_dock import platform_admin_required
 
 organization_routes = Blueprint('organization_routes', __name__)
 

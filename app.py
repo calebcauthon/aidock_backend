@@ -10,7 +10,7 @@ from routes_user_crud_for_platform_admin import user_routes
 from routes_organization_crud_for_platform_admin import organization_routes
 from db.init_db import create_table
 import psycopg2
-from auth import auth, login_required, platform_admin_required
+from routes_authentication_for_dock import auth, login_required, platform_admin_required
 from functools import wraps
 
 app = Flask(__name__, static_folder='templates')

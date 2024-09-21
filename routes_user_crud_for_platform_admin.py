@@ -3,7 +3,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import uuid
 from db.user_model import UserModel
 from db.init_db import create_connection, execute_sql
-from auth import platform_admin_required
+from routes_authentication_for_dock import platform_admin_required
 
 user_routes = Blueprint('user_routes', __name__)
 

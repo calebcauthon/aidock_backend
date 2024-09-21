@@ -4,7 +4,7 @@ from sqlite3 import Error
 from flask import send_from_directory
 from flask_cors import CORS
 from db.init_db import create_connection
-from auth import platform_admin_required
+from routes_authentication_for_dock import platform_admin_required
 
 context_docs = Blueprint('context_docs', __name__, static_folder='lavendel_frontend')
 CORS(context_docs)
