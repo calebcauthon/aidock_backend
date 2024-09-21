@@ -82,3 +82,17 @@ class UserModel:
         execute_sql(conn, "UPDATE users SET login_token = ? WHERE id = ?", (login_token, user_id))
         conn.close()
         return True
+
+    @staticmethod
+    def update_password(user_id, new_password):
+        conn = create_connection()
+        if conn is not None:
+            try:
+                password_hash = generate_password_hash(new_password)
+                execute_sql(conn, "UPDATE users SET password_hash = ? WHERE id = ?", (password_hash, user_id))
+                conn.close()
+            except Exception as e:
+                conn.close()
+                raise e
+        else:
+            raise Exception("Unable to connect to the database")

@@ -54,9 +54,15 @@ def edit_user(user_id):
         email = request.form.get('email')
         role = request.form.get('role')
         organization_id = request.form.get('organization_id')
+        new_password = request.form.get('new_password')
         
         try:
             UserModel.update_user(user_id, username, email, role, organization_id)
+            
+            # Update password if a new one is provided
+            if new_password:
+                UserModel.update_password(user_id, new_password)
+            
             return redirect(url_for('user_routes.list_users'))
         except Exception as e:
             return jsonify({"error": str(e)}), 500

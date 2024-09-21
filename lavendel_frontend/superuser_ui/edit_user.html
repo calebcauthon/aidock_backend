@@ -2,22 +2,32 @@
 
 {% block content %}
     <h1>Edit User</h1>
-    <form method="POST" action="/users/[[ user.id ]]/edit">
-        <label for="username">Username:</label>
-
-        <input type="text" id="username" name="username" value="[[ user.username ]]" required>
-        
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="[[ user.email ]]" required>
-
-        <label for="role">Role:</label>
-        <input type="text" id="role" name="role" value="[[ user.role ]]" required>
-
-        <label for="organization_id">Organization ID:</label>
-        <input type="number" id="organization_id" name="organization_id" value="[[ user.organization_id ]]" required>
-
-        <input type="submit" value="Update User">
-
+    <form action="[[ url_for('user_routes.edit_user', user_id=user['id']) ]]" method="POST">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username" value="[[ user['username'] ]]" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" id="email" name="email" value="[[ user['email'] ]]" required>
+        </div>
+        <div class="form-group">
+            <label for="role">Role</label>
+            <select class="form-control" id="role" name="role">
+                <option value="user" [[ 'selected' if user['role'] == 'user' else '' ]]>User</option>
+                <option value="admin" [[ 'selected' if user['role'] == 'admin' else '' ]]>Admin</option>
+                <option value="platform_admin" [[ 'selected' if user['role'] == 'platform_admin' else '' ]]>Platform Admin</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="organization_id">Organization ID</label>
+            <input type="number" class="form-control" id="organization_id" name="organization_id" value="[[ user['organization_id'] ]]">
+        </div>
+        <div class="form-group">
+            <label for="new_password">New Password (leave blank to keep current password)</label>
+            <input type="password" class="form-control" id="new_password" name="new_password">
+        </div>
+        <button type="submit" class="btn btn-primary">Update User</button>
     </form>
-    <a href="/users">Back to User List</a>
+    <a href="[[ url_for('user_routes.list_users') ]]" class="btn btn-secondary">Back to User List</a>
 {% endblock %}
