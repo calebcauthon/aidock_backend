@@ -13,7 +13,20 @@ def create_connection():
         import sqlite3
         return sqlite3.connect('lavendel.db')
 
+
+def execute_sql(conn, sql):
+    cur = conn.cursor()
+    try:
+        cur.execute(sql)
+        result = cur.fetchall()
+        conn.commit()
+        return [dict(zip([column[0] for column in cur.description], row)) for row in result]
+    finally:
+        cur.close()
+
 def create_table(conn):
+
+
     try:
         cur = conn.cursor()
         cur.execute("""
@@ -36,6 +49,19 @@ def create_table(conn):
             )
         """)
         conn.commit()
+        
+        # Create users table
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL UNIQUE,
+                email TEXT NOT NULL UNIQUE,
+                password_hash TEXT NOT NULL,
+                login_token TEXT
+            )
+        """)
+        conn.commit()
+
         cur.close()
     except (sqlite3.Error, psycopg2.Error) as e:
         print(f"Database error: {e}")

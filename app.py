@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify, send_from_directory, render_template
+
 import os
 import anthropic
 from flask_cors import CORS
 from prompt import get_system_prompt
 from context_docs_routes import context_docs, create_connection
 from prompt_routes import prompt_routes  # Add this import
+from user_routes import user_routes  # Add this import
 from init_db import create_table
 from datetime import datetime
 import psycopg2
@@ -41,6 +43,7 @@ app.register_blueprint(context_docs, url_prefix='/context_docs')
 
 # Register the prompt_routes blueprint
 app.register_blueprint(prompt_routes)
+app.register_blueprint(user_routes, url_prefix='/users')
 
 @app.route('/hello')
 def hello_world():
@@ -131,13 +134,6 @@ def get_context_document(doc_id):
             conn.close()
     else:
         return jsonify({"error": "Unable to connect to the database"}), 500
-
-@app.route('/authenticate', methods=['POST'])
-def authenticate():
-    return jsonify({
-        "status": "success",
-        "message": "Authentication successful"
-    }), 200
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
