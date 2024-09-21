@@ -12,6 +12,7 @@ from db.init_db import create_table
 import psycopg2
 from routes_authentication_for_dock import auth, login_required, platform_admin_required
 from functools import wraps
+from db.prompt_history import Datastore as PromptHistoryDatastore
 
 app = Flask(__name__, static_folder='templates')
 app.template_folder = 'templates'
@@ -129,36 +130,24 @@ def prompt_history():
     limit = 1
 
     conn = create_connection()
+    datastore = PromptHistoryDatastore(conn)
+
     if conn is not None:
         try:
-            cursor = conn.cursor()
-            
-            # Get total count
-            cursor.execute("SELECT COUNT(*) FROM prompt_history")
-            total_count = cursor.fetchone()[0]
-
-            # Get the current entry
-            cursor.execute("SELECT * FROM prompt_history ORDER BY timestamp DESC LIMIT ? OFFSET ?", (limit, offset))
-            entry = cursor.fetchone()
-
-            cursor.close()
-
-            if entry:
-                has_prev = offset > 0
-                has_next = offset + limit < total_count
-
+            history = datastore.get_prompt_history(offset, limit)
+            if history:
                 return render_template('superuser_ui/prompt_history.html', 
-                                       entry=entry,
-                                       has_prev=has_prev,
-                                       has_next=has_next,
-                                       prev_offset=max(0, offset - limit),
-                                       next_offset=offset + limit)
+                                       entry=history['entry'],
+                                       has_prev=history['has_prev'],
+                                       has_next=history['has_next'],
+                                       prev_offset=history['prev_offset'],
+                                       next_offset=history['next_offset'])
             else:
                 return render_template('superuser_ui/prompt_history.html', entry=None)
         except Exception as e:
             return jsonify({"error": str(e)}), 500
         finally:
-            conn.close()
+            datastore.close_connection()
     else:
         return jsonify({"error": "Unable to connect to the database"}), 500
 
