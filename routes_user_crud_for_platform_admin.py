@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 import uuid
-from user_model import UserModel
-from init_db import create_connection, execute_sql
+from db.user_model import UserModel
+from db.init_db import create_connection, execute_sql
 from auth import platform_admin_required
 
 user_routes = Blueprint('user_routes', __name__)

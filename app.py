@@ -3,20 +3,18 @@ from flask import Flask, request, jsonify, send_from_directory, render_template
 import os
 import anthropic
 from flask_cors import CORS
-from prompt import get_system_prompt
-from context_docs_routes import context_docs, create_connection
-from prompt_routes import prompt_routes  # Add this import
-from user_routes import user_routes  # Add this import
-from init_db import create_table
-from datetime import datetime
+from helpers_for_inference.prompt import get_system_prompt
+from routes_context_docs_for_platform_admin import context_docs, create_connection
+from routes_title_prompt_for_dock import prompt_routes
+from routes_user_crud_for_platform_admin import user_routes
+from routes_organization_crud_for_platform_admin import organization_routes
+from db.init_db import create_table
 import psycopg2
-from psycopg2 import sql
 from auth import auth, login_required, platform_admin_required
-from user_model import UserModel
 from functools import wraps
 
-app = Flask(__name__, static_folder='lavendel_frontend')
-app.template_folder = 'lavendel_frontend'
+app = Flask(__name__, static_folder='templates')
+app.template_folder = 'templates'
 app.jinja_env.variable_start_string = '[['
 app.jinja_env.variable_end_string = ']]'
 
@@ -41,22 +39,12 @@ if conn is not None:
 else:
     print("Error! Cannot create the database connection.")
 
-# Register the context_docs blueprint
 app.register_blueprint(context_docs, url_prefix='/context_docs')
-
-# Register the prompt_routes blueprint
 app.register_blueprint(prompt_routes)
 app.register_blueprint(user_routes, url_prefix='/users')
-
-from organization_routes import organization_routes  # Add this import
-
-# Register the organization_routes blueprint
 app.register_blueprint(organization_routes, url_prefix='/organizations')
-
-# Register the auth blueprint
 app.register_blueprint(auth)
 
-# Add a secret key for session management
 app.secret_key = os.environ.get("SECRET_KEY", "your_fallback_secret_key")
 
 @app.route('/hello')
@@ -68,7 +56,7 @@ def authenticate_user_with_token(func):
     def wrapper(*args, **kwargs):
         from flask import request, jsonify
         from functools import wraps
-        from user_model import UserModel
+        from db.user_model import UserModel
 
         print("All headers:")
         for header, value in request.headers.items():

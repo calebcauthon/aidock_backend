@@ -1,6 +1,6 @@
 import re
 from typing import List
-from context_docs_routes import create_connection
+from routes_context_docs_for_platform_admin import create_connection
 
 def get_relevant_context_docs(organization_id: int, url: str) -> List[str]:
     conn = create_connection()

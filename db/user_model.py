@@ -1,4 +1,4 @@
-from init_db import create_connection, execute_sql
+from db.init_db import create_connection, execute_sql
 from werkzeug.security import generate_password_hash
 
 class UserModel:

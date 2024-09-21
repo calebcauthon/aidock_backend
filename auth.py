@@ -1,6 +1,6 @@
 from flask import Blueprint, request, redirect, url_for, render_template, flash, session
 from werkzeug.security import check_password_hash, generate_password_hash
-from init_db import create_connection, execute_sql
+from db.init_db import create_connection, execute_sql
 from functools import wraps
 
 auth = Blueprint('auth', __name__)
