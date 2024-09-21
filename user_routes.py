@@ -23,12 +23,14 @@ def create_user():
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
+        role = request.form.get('role')
+        organization_id = request.form.get('organization_id')
         
         if not username or not email or not password:
             return jsonify({"error": "Missing required fields"}), 400
         
         try:
-            UserModel.create_user(username, email, password)
+            UserModel.create_user(username, email, password, role, organization_id)
             return redirect(url_for('user_routes.get_all_users'))
         except Exception as e:
             return jsonify({"error": str(e)}), 500
@@ -44,9 +46,11 @@ def update_user(user_id):
     if request.method == 'POST':
         username = request.form.get('username')
         email = request.form.get('email')
+        role = request.form.get('role')
+        organization_id = request.form.get('organization_id')
         
         try:
-            UserModel.update_user(user_id, username, email)
+            UserModel.update_user(user_id, username, email, role, organization_id)
             return redirect(url_for('user_routes.get_all_users'))
         except Exception as e:
             return jsonify({"error": str(e)}), 500

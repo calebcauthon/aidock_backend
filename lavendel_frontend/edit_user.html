@@ -14,14 +14,21 @@
 </head>
 <body>
     <h1>Edit User</h1>
-    <form method="POST" action="/users/[[ user.id ]]">
+    <form method="POST" action="/users/[[ user.id ]]/edit">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" value="[[ user.username ]]" required>
         
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" value="[[ user.email ]]" required>
-        
+
+        <label for="role">Role:</label>
+        <input type="text" id="role" name="role" value="[[ user.role ]]" required>
+
+        <label for="organization_id">Organization ID:</label>
+        <input type="number" id="organization_id" name="organization_id" value="[[ user.organization_id ]]" required>
+
         <input type="submit" value="Update User">
+
     </form>
     <a href="/users">Back to User List</a>
 </body>

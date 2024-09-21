@@ -78,14 +78,13 @@ def create_table(conn):
         print(f"Users table possibly created")
 
         # Create organizations table
-        cur.execute("""
+        cur.execute('''
             CREATE TABLE IF NOT EXISTS organizations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL UNIQUE
+                name TEXT NOT NULL,
+                description TEXT
             )
-        """)
-        conn.commit()
-        print(f"Organizations table possibly created")
+        ''')
 
         cur.close()
     except (sqlite3.Error, psycopg2.Error) as e:

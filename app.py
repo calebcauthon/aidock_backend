@@ -45,6 +45,11 @@ app.register_blueprint(context_docs, url_prefix='/context_docs')
 app.register_blueprint(prompt_routes)
 app.register_blueprint(user_routes, url_prefix='/users')
 
+from organization_routes import organization_routes  # Add this import
+
+# Register the organization_routes blueprint
+app.register_blueprint(organization_routes, url_prefix='/organizations')
+
 @app.route('/hello')
 def hello_world():
     return "Hello, World!"

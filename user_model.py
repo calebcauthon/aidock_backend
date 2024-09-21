@@ -5,27 +5,29 @@ class UserModel:
     @staticmethod
     def get_all_users():
         conn = create_connection()
-        users = execute_sql(conn, "SELECT id, username, email FROM users")
-        users = [{"id": user[0], "username": user[1], "email": user[2]} for user in users]
+        users = execute_sql(conn, "SELECT id, username, email, role, organization_id FROM users")
+        users = [{"id": user[0], "username": user[1], "email": user[2], "role": user[3], "organization_id": user[4]} for user in users]
         conn.close()
+
         return users
 
     @staticmethod
     def get_user(user_id):
         conn = create_connection()
-        user = execute_sql(conn, "SELECT id, username, email FROM users WHERE id = ?", (user_id,))
-        user = {"id": user[0][0], "username": user[0][1], "email": user[0][2]} if user else None
+        user = execute_sql(conn, "SELECT id, username, email, role, organization_id FROM users WHERE id = ?", (user_id,))
+        user = {"id": user[0][0], "username": user[0][1], "email": user[0][2], "role": user[0][3], "organization_id": user[0][4]} if user else None
         conn.close()
+
         return user if user else None
 
     @staticmethod
-    def create_user(username, email, password, role):
+    def create_user(username, email, password, role, organization_id):
         conn = create_connection()
         hashed_password = generate_password_hash(password)
 
         try:
-            execute_sql(conn, "INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)", 
-                        (username, email, hashed_password, role))
+            execute_sql(conn, "INSERT INTO users (username, email, password_hash, role, organization_id) VALUES (?, ?, ?, ?, ?)", 
+                        (username, email, hashed_password, role, organization_id))
             conn.close()
             return True
         except Exception as e:
@@ -33,7 +35,7 @@ class UserModel:
             raise e
 
     @staticmethod
-    def update_user(user_id, username=None, email=None):
+    def update_user(user_id, username=None, email=None, role=None, organization_id=None):
         conn = create_connection()
         update_fields = []
         params = []
@@ -43,8 +45,15 @@ class UserModel:
         if email:
             update_fields.append("email = ?")
             params.append(email)
+        if role:
+            update_fields.append("role = ?")
+            params.append(role)
+        if organization_id:
+            update_fields.append("organization_id = ?")
+            params.append(organization_id)
         
         if update_fields:
+
             update_query = f"UPDATE users SET {', '.join(update_fields)} WHERE id = ?"
             params.append(user_id)
             execute_sql(conn, update_query, tuple(params))

@@ -20,15 +20,21 @@
             <th>ID</th>
             <th>Username</th>
             <th>Email</th>
+            <th>Role</th>
+            <th>Organization ID</th>
             <th>Actions</th>
         </tr>
+
         {% for user in users %}
         <tr>
             <td>[[ user.id ]]</td>
             <td>[[ user.username ]]</td>
             <td>[[ user.email ]]</td>
+            <td>[[ user.role ]]</td>
+            <td>[[ user.organization_id ]]</td>
             <td>
                 <a href="/users/[[ user.id ]]">View</a>
+
                 <a href="/users/[[ user.id ]]/edit">Edit</a>
                 <a href="#" onclick="deleteUser([[ user.id ]])">Delete</a>
             </td>
