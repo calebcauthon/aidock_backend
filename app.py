@@ -126,30 +126,19 @@ def ask_claude(user):
 
 @app.route('/history')
 def prompt_history():
-    offset = request.args.get('offset', type=int, default=0)
-    limit = 1
-
     conn = create_connection()
     datastore = PromptHistoryDatastore(conn)
 
-    if conn is not None:
-        try:
-            history = datastore.get_prompt_history(offset, limit)
-            if history:
-                return render_template('superuser_ui/prompt_history.html', 
-                                       entry=history['entry'],
-                                       has_prev=history['has_prev'],
-                                       has_next=history['has_next'],
-                                       prev_offset=history['prev_offset'],
-                                       next_offset=history['next_offset'])
-            else:
-                return render_template('superuser_ui/prompt_history.html', entry=None)
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
-        finally:
-            datastore.close_connection()
-    else:
-        return jsonify({"error": "Unable to connect to the database"}), 500
+    offset = request.args.get('offset', type=int, default=0)
+    limit = 1
+
+    history = datastore.get_prompt_history(offset, limit)
+    return render_template('superuser_ui/prompt_history.html', 
+                            entry=history['entry'],
+                            has_prev=history['has_prev'],
+                            has_next=history['has_next'],
+                            prev_offset=history['prev_offset'],
+                            next_offset=history['next_offset'])
 
 @app.route('/context_docs/<int:doc_id>', methods=['GET'])
 def get_context_document(doc_id):
