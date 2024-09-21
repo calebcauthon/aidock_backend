@@ -1,16 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
+
+
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Context Docs Manager</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -44,7 +44,6 @@
     </style>
 </head>
 <body>
-    <h1>Context Docs Manager</h1>
     
     <form id="contextDocForm">
         <input type="hidden" id="docId">
@@ -59,6 +58,7 @@
             <tr>
                 <th>URL</th>
                 <th>Document Name</th>
+                <th>Organization</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -81,6 +81,7 @@
                         row.innerHTML = `
                             <td>${doc.url}</td>
                             <td>${doc.document_name}</td>
+                            <td>${doc.organization_id}</td>
                             <td>
                                 <button onclick="editDoc(${doc.id})">Edit</button>
                                 <button onclick="deleteDoc(${doc.id})">Delete</button>
@@ -136,3 +137,4 @@
     </script>
 </body>
 </html>
+{% endblock %}

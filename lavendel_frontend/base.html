@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>[[ title ]] - Lavendel Admin</title>
+    <title>[[ title ]] - AI Dock PlatformAdmin</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -124,6 +124,8 @@
         <ul>
             <li><a href="[[ url_for('organization_routes.list_organizations') ]]">Organizations</a></li>
             <li><a href="[[ url_for('user_routes.list_users') ]]">Users</a></li>
+            <li><a href="[[ url_for('context_docs.serve_docs') ]]">Context Docs</a></li>
+
             <li><a href="[[ url_for('auth.logout') ]]">Logout</a></li>
         </ul>
     </div>

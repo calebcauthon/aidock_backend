@@ -1,58 +1,27 @@
-from flask import request, jsonify, Blueprint
+from flask import request, jsonify, Blueprint, render_template
 import sqlite3
 from sqlite3 import Error
 from flask import send_from_directory
 from flask_cors import CORS
 from init_db import create_connection
+from auth import platform_admin_required
+
 context_docs = Blueprint('context_docs', __name__, static_folder='lavendel_frontend')
 CORS(context_docs)
 
 @context_docs.route('/', methods=['GET'])
+@platform_admin_required
 def get_context_docs():
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM context_docs")
+    cur.execute("SELECT id, url, document_name, document_text, organization_id FROM context_docs")
     rows = cur.fetchall()
     conn.close()
-    return jsonify([{"id": row[0], "url": row[1], "document_name": row[2], "document_text": row[3]} for row in rows])
+    return jsonify([{"id": row[0], "url": row[1], "document_name": row[2], "document_text": row[3], "organization_id": row[4]} for row in rows])
 
-
-"""
-@api {post} / Add a new context document
-@apiName AddContextDoc
-@apiGroup ContextDocs
-
-@apiParam {String} url The URL associated with the context document.
-@apiParam {String} document_name The name of the context document.
-@apiParam {String} document_text The text content of the context document.
-
-@apiSuccess {Number} id The ID of the newly created context document.
-@apiSuccess {String} message Success message.
-
-@apiError {String} error Error message indicating missing required fields.
-
-@apiExample {json} Request-Example:
-    {
-        "url": "http://example.com",
-        "document_name": "Example Document",
-        "document_text": "This is an example document text."
-    }
-
-@apiSuccessExample {json} Success-Response:
-    HTTP/1.1 201 Created
-    {
-        "id": 1,
-        "message": "Context document added successfully"
-    }
-
-@apiErrorExample {json} Error-Response:
-    HTTP/1.1 400 Bad Request
-    {
-        "error": "Missing required fields"
-    }
-"""
 
 @context_docs.route('/', methods=['POST'])
+@platform_admin_required
 def add_context_doc():
     data = request.get_json()
     url = data.get('url')
@@ -72,15 +41,17 @@ def add_context_doc():
     
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("INSERT INTO context_docs (url, document_name, document_text) VALUES (%s, %s, %s)",
+    cur.execute("INSERT INTO context_docs (url, document_name, document_text) VALUES (?, ?, ?)",
                 (url, document_name, document_text))
     conn.commit()
+
     new_id = cur.lastrowid
     conn.close()
     
     return jsonify({"id": new_id, "message": "Context document added successfully"}), 201
 
 @context_docs.route('/<int:doc_id>', methods=['PUT'])
+@platform_admin_required
 def update_context_doc(doc_id):
     data = request.get_json()
     url = data.get('url')
@@ -92,14 +63,16 @@ def update_context_doc(doc_id):
     
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("UPDATE context_docs SET url=%s, document_name=%s, document_text=%s WHERE id=%s",
+    cur.execute("UPDATE context_docs SET url=?, document_name=?, document_text=? WHERE id=?",
                 (url, document_name, document_text, doc_id))
     conn.commit()
+
     conn.close()
     
     return jsonify({"message": "Context document updated successfully"})
 
 @context_docs.route('/<int:doc_id>', methods=['DELETE'])
+@platform_admin_required
 def delete_context_doc(doc_id):
     conn = create_connection()
     cur = conn.cursor()
@@ -110,20 +83,25 @@ def delete_context_doc(doc_id):
     return jsonify({"message": "Context document deleted successfully"})
 
 @context_docs.route('/edit_doc/<int:doc_id>')
+@platform_admin_required
 def edit_doc_page(doc_id):
-    return send_from_directory(context_docs.static_folder, 'edit_doc.html')
+    return render_template('superuser_ui/edit_doc.html', doc_id=doc_id)
+
 
 @context_docs.route('/docs')
+@platform_admin_required
 def serve_docs():
-    return send_from_directory(context_docs.static_folder, 'context_docs.html')
+    return render_template('superuser_ui/context_docs.html')
 
 @context_docs.route('/<int:doc_id>', methods=['GET'])
+@platform_admin_required
 def get_context_doc(doc_id):
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM context_docs WHERE id=%s", (doc_id,))
+    cur.execute("SELECT * FROM context_docs WHERE id=?", (doc_id,))
     doc = cur.fetchone()
     conn.close()
+
     
     if doc:
         doc_data = {
@@ -137,6 +115,7 @@ def get_context_doc(doc_id):
         return jsonify({"error": "Document not found"}), 404
 
 @context_docs.route('/<int:doc_id>', methods=['DELETE'])
+@platform_admin_required
 def delete_context_document(doc_id):
     conn = create_connection()
     if conn is not None:
