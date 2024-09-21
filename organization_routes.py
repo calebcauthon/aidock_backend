@@ -67,7 +67,10 @@ def view_organization(org_id):
     conn = create_connection()
     if conn is not None:
         organization = execute_sql(conn, "SELECT * FROM organizations WHERE id = ?", (org_id,))
-        conn.close()
         if organization:
-            return render_template('superuser_ui/view_organization.html', organization=organization[0])
+            # Fetch users belonging to this organization
+            users = execute_sql(conn, "SELECT id, username, email, role FROM users WHERE organization_id = ?", (org_id,))
+            conn.close()
+            return render_template('superuser_ui/view_organization.html', organization=organization[0], users=users)
+    conn.close()
     return jsonify({"error": "Organization not found"}), 404

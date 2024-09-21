@@ -16,6 +16,37 @@
         <td>[[ organization[2] ]]</td>
     </tr>
 </table>
-<a href="[[ url_for('organization_routes.edit_organization', org_id=organization[0]) ]]" class="btn btn-warning">Edit</a>
+
+<h2>Users in this Organization</h2>
+{% if users %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>[[ user[0] ]]</td>
+                <td>[[ user[1] ]]</td>
+                <td>[[ user[2] ]]</td>
+                <td>[[ user[3] ]]</td>
+                <td>
+                    <a href="[[ url_for('user_routes.edit_user', user_id=user[0]) ]]" class="btn btn-warning">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No users found for this organization.</p>
+{% endif %}
+
+<a href="[[ url_for('organization_routes.edit_organization', org_id=organization[0]) ]]" class="btn btn-warning">Edit Organization</a>
 <a href="[[ url_for('organization_routes.list_organizations') ]]" class="btn">Back to List</a>
 {% endblock %}

@@ -57,7 +57,7 @@ def edit_user(user_id):
         
         try:
             UserModel.update_user(user_id, username, email, role, organization_id)
-            return redirect(url_for('user_routes.get_all_users'))
+            return redirect(url_for('user_routes.list_users'))
         except Exception as e:
             return jsonify({"error": str(e)}), 500
     
