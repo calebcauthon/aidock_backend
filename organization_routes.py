@@ -60,3 +60,14 @@ def delete_organization(org_id):
         conn.close()
         return redirect(url_for('organization_routes.list_organizations'))
     return jsonify({"error": "Unable to connect to the database"}), 500
+
+@organization_routes.route('/<int:org_id>', methods=['GET'])
+@platform_admin_required
+def view_organization(org_id):
+    conn = create_connection()
+    if conn is not None:
+        organization = execute_sql(conn, "SELECT * FROM organizations WHERE id = ?", (org_id,))
+        conn.close()
+        if organization:
+            return render_template('superuser_ui/view_organization.html', organization=organization[0])
+    return jsonify({"error": "Organization not found"}), 404

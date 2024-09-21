@@ -21,8 +21,9 @@
                 <td>[[ org.description ]]</td>
 
                 <td>
-                    <a href="[[ url_for('organization_routes.edit_organization', org_id=org["id"]) ]]" class="btn btn-warning">Edit</a>
-                    <form action="[[ url_for('organization_routes.delete_organization', org_id=org["id"]) ]]" method="POST" style="display: inline;">
+                    <a href="[[ url_for('organization_routes.view_organization', org_id=org.id) ]]" class="btn btn-info">View</a>
+                    <a href="[[ url_for('organization_routes.edit_organization', org_id=org.id) ]]" class="btn btn-warning">Edit</a>
+                    <form action="[[ url_for('organization_routes.delete_organization', org_id=org.id) ]]" method="POST" style="display: inline;">
                         <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this organization?')">Delete</button>
                     </form>
 
