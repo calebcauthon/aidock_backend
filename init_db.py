@@ -14,15 +14,23 @@ def create_connection():
         return sqlite3.connect('lavendel.db')
 
 
-def execute_sql(conn, sql):
-    cur = conn.cursor()
+def execute_sql(conn, sql, params=None):
     try:
-        cur.execute(sql)
-        result = cur.fetchall()
+        cur = conn.cursor()
+        if params:
+            cur.execute(sql, params)
+        else:
+            cur.execute(sql)
         conn.commit()
-        return [dict(zip([column[0] for column in cur.description], row)) for row in result]
-    finally:
-        cur.close()
+        result = cur.fetchall()
+        print(f"Result: {result}")
+        return result
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+        conn.rollback()
+        raise e
+
 
 def create_table(conn):
 
