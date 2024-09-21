@@ -42,7 +42,8 @@ def create_table(conn):
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 url TEXT NOT NULL,
                 document_name TEXT NOT NULL,
-                document_text TEXT NOT NULL
+                document_text TEXT NOT NULL,
+                organization_id INTEGER NOT NULL
             )
         """)
         
@@ -53,10 +54,13 @@ def create_table(conn):
                 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 url TEXT NOT NULL,
                 prompt TEXT NOT NULL,
-                response TEXT NOT NULL
+                response TEXT NOT NULL,
+                user_id INTEGER NOT NULL
             )
         """)
+
         conn.commit()
+        print(f"Prompt history and context docs table possibly created")
         
         # Create users table
         cur.execute("""
@@ -65,10 +69,23 @@ def create_table(conn):
                 username TEXT NOT NULL UNIQUE,
                 email TEXT NOT NULL UNIQUE,
                 password_hash TEXT NOT NULL,
-                login_token TEXT
+                role TEXT NOT NULL,
+                login_token TEXT,
+                organization_id INTEGER
             )
         """)
         conn.commit()
+        print(f"Users table possibly created")
+
+        # Create organizations table
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS organizations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE
+            )
+        """)
+        conn.commit()
+        print(f"Organizations table possibly created")
 
         cur.close()
     except (sqlite3.Error, psycopg2.Error) as e:

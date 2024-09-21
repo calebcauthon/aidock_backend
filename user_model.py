@@ -19,12 +19,13 @@ class UserModel:
         return user if user else None
 
     @staticmethod
-    def create_user(username, email, password):
+    def create_user(username, email, password, role):
         conn = create_connection()
         hashed_password = generate_password_hash(password)
+
         try:
-            execute_sql(conn, "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)", 
-                        (username, email, hashed_password))
+            execute_sql(conn, "INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)", 
+                        (username, email, hashed_password, role))
             conn.close()
             return True
         except Exception as e:
