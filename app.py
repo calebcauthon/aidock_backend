@@ -13,6 +13,7 @@ import psycopg2
 from routes_authentication_for_dock import auth, login_required, platform_admin_required
 from functools import wraps
 from db.prompt_history import Datastore as PromptHistoryDatastore
+from routes_librarian import librarian_routes
 
 app = Flask(__name__, static_folder='templates')
 app.template_folder = 'templates'
@@ -45,6 +46,7 @@ app.register_blueprint(prompt_routes)
 app.register_blueprint(user_routes, url_prefix='/users')
 app.register_blueprint(organization_routes, url_prefix='/organizations')
 app.register_blueprint(auth)
+app.register_blueprint(librarian_routes)
 
 app.secret_key = os.environ.get("SECRET_KEY", "your_fallback_secret_key")
 

@@ -1,0 +1,95 @@
+{% extends "base_librarian.html" %}
+
+{% block content %}
+<div class="flex-1 p-8">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-bold">Dashboard</h2>
+        <div class="flex items-center space-x-4">
+            <div class="bg-white rounded-full p-2">🔔</div>
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gray-300 rounded-full"></div>
+                <span>Helen B.</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <h3 class="text-xl font-semibold mb-4">Activity</h3>
+        <div class="flex space-x-4">
+            <div class="flex-1">
+                <h4 class="text-lg mb-2">REGISTRATION ACC</h4>
+                <!-- Placeholder for chart -->
+                <div class="h-40 bg-gray-200 rounded"></div>
+            </div>
+            <div class="flex-1">
+                <h4 class="text-lg mb-2">SALE TOKEN</h4>
+                <!-- Placeholder for chart -->
+                <div class="h-40 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users table -->
+    <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">Users</h3>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <input type="text" placeholder="Search by Email" class="pl-8 pr-4 py-2 border rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-2 top-2.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <button class="p-2 border rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <table class="w-full">
+            <thead>
+                <tr class="text-left text-gray-500">
+                    <th class="pb-2"># NAME</th>
+                    <th class="pb-2">EMAIL</th>
+                    <th class="pb-2">OPEN DATE</th>
+                    <th class="pb-2">CLOSE DATE</th>
+                    <th class="pb-2">STATUS</th>
+                    <th class="pb-2">COUNTRY</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="py-2">1. Abbie Wilson</td>
+                    <td>example123@email.com</td>
+                    <td>15 Dec 2018</td>
+                    <td>10 Jul 2018</td>
+                    <td><span class="bg-red-100 text-red-800 px-2 py-1 rounded">Fail</span></td>
+                    <td>USA</td>
+                </tr>
+                <!-- Add more rows as needed -->
+            </tbody>
+        </table>
+        <div class="flex justify-between items-center mt-4">
+            <span class="text-gray-500">1-5 of 25</span>
+            <div class="flex space-x-2">
+                <button class="p-2 border rounded">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <button class="p-2 border rounded">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Activity charts -->
+    
+</div>
+{% endblock %}
