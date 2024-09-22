@@ -1,16 +1,13 @@
 from flask import Flask, request, jsonify, send_from_directory, render_template, url_for
-from routes_auth_helpers import authenticate_user_with_token
 import os
 from flask_cors import CORS
-from helpers_for_inference.prompt import get_system_prompt
 from routes_context_docs_for_platform_admin import context_docs, create_connection
 from routes_title_prompt_for_dock import prompt_routes
 from routes_user_crud_for_platform_admin import user_routes
 from routes_organization_crud_for_platform_admin import organization_routes
 from db.init_db import create_table
 import psycopg2
-from routes_authentication_for_dock import auth, login_required, platform_admin_required
-from functools import wraps
+from routes_authentication_for_dock import auth
 from db.prompt_history import Datastore as PromptHistoryDatastore
 from routes_librarian import librarian_routes
 from routes_chat_prompt_for_dock import chat_prompt_routes
