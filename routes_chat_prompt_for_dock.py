@@ -49,8 +49,8 @@ def ask_claude(user):
         if conn is not None:
             cur = conn.cursor()
             cur.execute(
-                "INSERT INTO prompt_history (url, prompt, response) VALUES (?, ?, ?)",
-                (url, f"SYSTEM PROMPT: {system_prompt} | USER QUESTION: {question}", answer)
+                "INSERT INTO prompt_history (url, prompt, response, user_id) VALUES (?, ?, ?, ?)",
+                (url, f"SYSTEM PROMPT: {system_prompt} | USER QUESTION: {question}", answer, user['id'])
             )
             conn.commit()
             cur.close()
