@@ -2,6 +2,27 @@ from db.init_db import create_connection
 
 class FileModel:
     @staticmethod
+    def update_file_name(file_id, new_file_name):
+        conn = create_connection()
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                UPDATE files
+                SET file_name = ?
+                WHERE id = ?
+            """, (new_file_name, file_id))
+            conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error updating file name: {e}")
+            conn.rollback()
+            return False
+        finally:
+            cur.close()
+            conn.close()
+
+
+    @staticmethod
     def get_file_by_id(file_id):
         conn = create_connection()
         cur = conn.cursor()
