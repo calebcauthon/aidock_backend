@@ -1,0 +1,49 @@
+{% extends "base_librarian.html" %}
+
+{% block content %}
+  <div>
+    <h1>User List for [[ organization.name ]]</h1>
+    <a href="[[ url_for('librarian_users.create_user') ]]" class="button">Create New User</a>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
+        </tr>
+
+        {% for user in users %}
+        <tr>
+            <td>[[ user.id ]]</td>
+            <td>[[ user.username ]]</td>
+            <td>[[ user.email ]]</td>
+            <td>[[ user.role ]]</td>
+            <td>
+                <a href="[[ url_for('librarian_users.edit_user', user_id=user.id) ]]">Edit</a>
+                <a href="#" onclick="deleteUser([[ user.id ]])">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+  </div>
+    <script>
+        function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                fetch(`[[ url_for('librarian_users.delete_user', user_id=0) ]]`.replace('0', userId), { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(data.message);
+                        location.reload();
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        }
+    </script>
+{% endblock %}

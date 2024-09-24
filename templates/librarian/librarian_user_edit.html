@@ -1,0 +1,21 @@
+{% extends "base_librarian.html" %}
+
+{% block content %}
+    <h1>Edit User: {{ user.username }}</h1>
+    <form method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" value="{{ user.username }}" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" value="{{ user.email }}" required>
+
+        <label for="role">Role:</label>
+        <select id="role" name="role" required>
+            <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+            <option value="librarian" {% if user.role == 'librarian' %}selected{% endif %}>Librarian</option>
+        </select>
+
+        <input type="submit" value="Update User">
+    </form>
+    <a href="{{ url_for('librarian_users.librarian_users') }}">Back to User List</a>
+{% endblock %}

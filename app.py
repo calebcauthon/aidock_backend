@@ -12,6 +12,7 @@ from db.prompt_history import Datastore as PromptHistoryDatastore
 from routes_librarian import librarian_routes
 from routes_chat_prompt_for_dock import chat_prompt_routes
 from routes_files import files_routes
+from routes_librarian_users import librarian_users_routes
 
 app = Flask(__name__, static_folder='static')
 app.template_folder = 'templates'
@@ -59,6 +60,7 @@ app.register_blueprint(auth)
 app.register_blueprint(librarian_routes)
 app.register_blueprint(files_routes)  # Add this line
 app.register_blueprint(chat_prompt_routes)
+app.register_blueprint(librarian_users_routes)
 
 app.secret_key = os.environ.get("SECRET_KEY", "your_fallback_secret_key")
 

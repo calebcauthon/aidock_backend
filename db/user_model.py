@@ -3,6 +3,13 @@ from werkzeug.security import generate_password_hash
 
 class UserModel:
     @staticmethod
+    def get_users_for_organization(organization_id):
+        conn = create_connection()
+        users = execute_sql(conn, "SELECT id, username, email, role FROM users WHERE organization_id = ?", (organization_id,))
+        users = [{"id": user[0], "username": user[1], "email": user[2], "role": user[3]} for user in users]
+        conn.close()
+        return users
+
     def get_user_by_login_token(login_token):
         conn = create_connection()
         user = execute_sql(conn, "SELECT id, username, email, role, organization_id FROM users WHERE login_token = ?", (login_token,))
