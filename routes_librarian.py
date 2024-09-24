@@ -3,6 +3,8 @@ from werkzeug.utils import secure_filename
 from routes_auth_helpers import librarian_required
 from db.organization_model import OrganizationModel
 from db.conversation_model import ConversationModel
+from db.context_docs import ContextDocModel
+from db.file_model import FileModel  # Add this import
 import os
 
 librarian_routes = Blueprint('librarian', __name__)
@@ -20,9 +22,6 @@ def librarian_home(librarian):
 @librarian_routes.route('/librarian/upload', methods=['POST'])
 @librarian_required
 def upload_file(librarian):
-    print("Request: ", request)
-    print("Request files: ", request.files.getlist('file'))
-
     if 'file' not in request.files:
         return redirect(url_for('librarian.librarian_files'))
 
@@ -35,17 +34,32 @@ def upload_file(librarian):
     file.save(file_path)
     
     # Read the content of the file
-    with open(file_path, 'r') as f:
-        file_content = f.read()
+    with open(file_path, 'rb') as f:
+        binary_content = f.read()
     
-    # Add the file to context docs
-    from db.context_docs import ContextDocModel
-    ContextDocModel.add_context_doc(
+    # Try to read the file as text
+    try:
+        with open(file_path, 'r') as f:
+            text_content = f.read()
+    except UnicodeDecodeError:
+        text_content = None  # File is not readable as text
+    
+    # Add the file to the files table
+    FileModel.add_file(
         organization_id=librarian['organization_id'],
-        url='*',  # Using '*' to make it available for all URLs
-        document_name=filename,
-        document_text=file_content
+        user_upload_id=librarian['id'],
+        binary_content=binary_content,
+        text_content=text_content
     )
+
+    # Add the file to context docs if it's readable as text
+    if text_content:
+        ContextDocModel.add_context_doc(
+            organization_id=librarian['organization_id'],
+            url='*',  # Using '*' to make it available for all URLs
+            document_name=filename,
+            document_text=text_content
+        )
 
     return redirect(url_for('librarian.librarian_files'))
 
@@ -53,6 +67,5 @@ def upload_file(librarian):
 @librarian_required
 def librarian_files(librarian):
     organization = OrganizationModel.get_organization(librarian['organization_id'])
-    # TODO: Fetch files data for the organization
-    files = []  # Placeholder for files data
+    files = FileModel.get_files_for_organization(librarian['organization_id'])
     return render_template('librarian/librarian_files.html', librarian=librarian, organization=organization, files=files)

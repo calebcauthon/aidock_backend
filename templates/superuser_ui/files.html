@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>All Files</h1>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">[[ message ]]</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Organization</th>
+      <th>User Upload ID</th>
+      <th>Timestamp</th>
+      <th>Text Content</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for file in files %}
+    [[ file ]]
+    <tr>
+      <td>[[ file.id ]]</td>
+      <td>[[ organizations[file.organization_id] ]]</td>
+      <td>[[ file.user_upload_id ]]</td>
+      <td>[[ file.timestamp_of_upload ]]</td>
+      <td>[[ file.text_content|length|default(0) ]] characters</td>
+
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

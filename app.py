@@ -11,6 +11,7 @@ from routes_authentication_for_dock import auth
 from db.prompt_history import Datastore as PromptHistoryDatastore
 from routes_librarian import librarian_routes
 from routes_chat_prompt_for_dock import chat_prompt_routes
+from routes_superuser import superuser_routes
 
 app = Flask(__name__, static_folder='static')
 app.template_folder = 'templates'
@@ -56,6 +57,7 @@ app.register_blueprint(user_routes, url_prefix='/users')
 app.register_blueprint(organization_routes, url_prefix='/organizations')
 app.register_blueprint(auth)
 app.register_blueprint(librarian_routes)
+app.register_blueprint(superuser_routes)  # Add this line
 app.register_blueprint(chat_prompt_routes)
 
 app.secret_key = os.environ.get("SECRET_KEY", "your_fallback_secret_key")

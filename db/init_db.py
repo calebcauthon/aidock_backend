@@ -86,6 +86,22 @@ def create_table(conn):
             )
         ''')
 
+        # Create files table
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS files (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                organization_id INTEGER NOT NULL,
+                user_upload_id INTEGER NOT NULL,
+                binary_content BLOB,
+                text_content TEXT,
+                timestamp_of_upload TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (organization_id) REFERENCES organizations (id),
+                FOREIGN KEY (user_upload_id) REFERENCES users (id)
+            )
+        """)
+        conn.commit()
+        print("Files table possibly created")
+
         cur.close()
     except (sqlite3.Error, psycopg2.Error) as e:
         print(f"Database error: {e}")
