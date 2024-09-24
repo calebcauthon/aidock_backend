@@ -70,17 +70,11 @@
             </thead>
             <tbody>
                 <tr ng-repeat="file in files">
-                    <td>
-                        <span ng-hide="file.editing">{[{ file.name }]}</span>
-                        <input ng-show="file.editing" type="text" ng-model="file.newName" class="border rounded px-2 py-1">
-                    </td>
+                    <td>{[{ file.name }]}</td>
                     <td>{[{ formatFileSize(file.size) }]}</td>
                     <td>{[{ file.upload_date | date:'medium' }]}</td>
                     <td>{[{ file.user_name }]}</td>
                     <td>
-                        <button ng-hide="file.editing" ng-click="startEditing(file)" class="text-blue-500 hover:text-blue-700 mr-2">Edit</button>
-                        <button ng-show="file.editing" ng-click="saveEdit(file)" class="text-green-500 hover:text-green-700 mr-2">Save</button>
-                        <button ng-show="file.editing" ng-click="cancelEdit(file)" class="text-gray-500 hover:text-gray-700 mr-2">Cancel</button>
                         <button ng-click="deleteFile(file.id)" class="text-red-500 hover:text-red-700">Delete</button>
                     </td>
                 </tr>
@@ -134,31 +128,6 @@
                                 alert('An error occurred while deleting the file.');
                             });
                     }
-                };
-
-                $scope.startEditing = function(file) {
-                    file.editing = true;
-                    file.newName = file.name;
-                };
-
-                $scope.cancelEdit = function(file) {
-                    file.editing = false;
-                    file.newName = file.name;
-                };
-
-                $scope.saveEdit = function(file) {
-                    $http.post('/librarian/edit_file/' + file.id, { new_filename: file.newName })
-                        .then(function(response) {
-                            if (response.data.success) {
-                                file.name = file.newName;
-                                file.editing = false;
-                            } else {
-                                alert('Failed to update file name: ' + response.data.message);
-                            }
-                        }, function(error) {
-                            console.error('Error updating file name:', error);
-                            alert('An error occurred while updating the file name.');
-                        });
                 };
 
                 $scope.formatFileSize = function(bytes) {

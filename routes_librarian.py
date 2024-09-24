@@ -6,7 +6,6 @@ from db.conversation_model import ConversationModel
 from db.context_docs import ContextDocModel
 from db.file_model import FileModel  # Add this import
 from db.user_model import UserModel
-from flask_login import current_user, login_required
 import os
 
 librarian_routes = Blueprint('librarian', __name__)
@@ -109,20 +108,3 @@ def delete_file(librarian,file_id):
             return jsonify({'success': False, 'message': 'Failed to delete file'}), 500
     else:
         return jsonify({'success': False, 'message': 'File not found or you do not have permission to delete it'}), 404
-
-@librarian_routes.route('/librarian/edit_file/<int:file_id>', methods=['POST'])
-@librarian_required
-def edit_file(librarian, file_id):
-    file = FileModel.get_file_by_id(file_id)
-    new_filename = request.json.get('new_filename')
-    
-    if not new_filename:
-        return jsonify({'success': False, 'message': 'New filename is required'}), 400
-    
-    if file and file['organization_id'] == librarian['organization_id']:
-        if FileModel.update_file_name(file_id, new_filename):
-            return jsonify({'success': True, 'message': 'File name updated successfully'})
-        else:
-            return jsonify({'success': False, 'message': 'Failed to update file name'}), 500
-    else:
-        return jsonify({'success': False, 'message': 'File not found or you do not have permission to edit it'}), 404
