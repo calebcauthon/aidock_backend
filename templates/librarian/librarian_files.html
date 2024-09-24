@@ -40,8 +40,16 @@
     }
 </style>
 
-<div class="flex-1 p-10" ng-app="fileApp" ng-controller="FileController">
-    <h1 class="text-3xl font-bold mb-6">Files</h1>
+<div class="flex-1 p-8" ng-app="fileApp" ng-controller="FileController">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-bold mb-6">Files</h2>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <span>[[librarian['username']]] | [[organization['name']]]</span>
+                <a href="[[ url_for('auth.logout') ]]" class="text-blue-500 hover:text-blue-700">Logout</a>
+            </div>
+        </div>
+    </div>
     
     <div class="bg-white shadow-md rounded-lg p-6 mb-6">
         <form action="[[ url_for('librarian.upload_file') ]]" method="POST" enctype="multipart/form-data">
@@ -50,7 +58,6 @@
     </div>
 
     <div class="bg-white shadow-md rounded-lg p-6">
-        <h2 class="text-2xl font-bold mb-4">Organization Files</h2>
         <table class="w-full">
             <thead>
                 <tr>
