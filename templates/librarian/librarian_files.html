@@ -65,19 +65,13 @@
                     <td>{[{ file.name }]}</td>
                     <td>{[{ file.size }]} kb</td>
                     <td>{[{ file.upload_date | date:'medium' }]}</td>
-                    <td>{[{ file.user_name }]} ([{[ file.user_id }]])</td>
+                    <td>{[{ file.user_name }]} ({[{ file.uploaded_by }]})</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
     <script>
-        // FilePond initialization
-        const inputElement = document.querySelector('input[type="file"]');
-        const pond = FilePond.create(inputElement, {
-            server: '/librarian/upload',
-        });
-
         // Angular app
         angular.module('fileApp', [])
             .config(function($interpolateProvider) {
@@ -87,12 +81,27 @@
             .controller('FileController', function($scope, $http) {
                 $scope.files = [];
 
-                $http.get('/librarian/files')
-                    .then(function(response) {
-                        $scope.files = response.data;
-                    }, function(error) {
-                        console.error('Error fetching files:', error);
-                    });
+                $scope.refreshFiles = function() {
+                    $http.get('/librarian/files')
+                        .then(function(response) {
+                            $scope.files = response.data;
+                        }, function(error) {
+                            console.error('Error fetching files:', error);
+                        });
+                };
+
+                // Initial load of files
+                $scope.refreshFiles();
+
+                // FilePond initialization
+                const inputElement = document.querySelector('input[type="file"]');
+                const pond = FilePond.create(inputElement, {
+                    server: '/librarian/upload',
+                });
+
+                document.addEventListener('FilePond:processfile', (e) => {
+                  $scope.refreshFiles();
+                });
             });
     </script>
 </div>
