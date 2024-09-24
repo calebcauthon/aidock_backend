@@ -14,6 +14,10 @@ def login():
         conn = create_connection()
         user = execute_sql(conn, "SELECT id, username, password_hash, role, organization_id FROM users WHERE username = ?", (username,))
         conn.close()
+
+        if not user:
+            flash('Invalid username or password', 'error')
+            return redirect(url_for('auth.login'))
         
         password_hash = user[0][2]
         if user and check_password_hash(password_hash, password):
