@@ -43,7 +43,9 @@ def edit_user(librarian, user_id):
             role=request.form['role']
         )
         return redirect(url_for('librarian_users.librarian_users'))
-    return render_template('librarian/librarian_user_edit.html', librarian=librarian, user=user)
+
+    organization = OrganizationModel.get_organization(librarian['organization_id'])
+    return render_template('librarian/librarian_user_edit.html', librarian=librarian, user=user, organization=organization)
 
 @librarian_users_routes.route('/librarian/users/<int:user_id>/delete', methods=['POST'])
 @librarian_required
@@ -53,4 +55,5 @@ def delete_user(librarian, user_id):
         return jsonify({'error': 'Unauthorized'}), 403
     
     UserModel.delete_user(user_id)
+    return jsonify({'message': 'User deleted successfully'})
     return jsonify({'message': 'User deleted successfully'})
