@@ -266,6 +266,21 @@ files = [
 Flask = ">=0.9"
 
 [[package]]
+name = "flask-login"
+version = "0.6.3"
+description = "User authentication and session management for Flask."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "Flask-Login-0.6.3.tar.gz", hash = "sha256:5e23d14a607ef12806c699590b89d0f0e0d67baeec599d75947bf9c147330333"},
+    {file = "Flask_Login-0.6.3-py3-none-any.whl", hash = "sha256:849b25b82a436bf830a054e74214074af59097171562ab10bfa999e6b78aae5d"},
+]
+
+[package.dependencies]
+Flask = ">=1.0.4"
+Werkzeug = ">=1.0.1"
+
+[[package]]
 name = "fsspec"
 version = "2024.6.1"
 description = "File-system specification"
@@ -1028,4 +1043,4 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "1508a9dd7ace35bc214cff8db1d284e1eba46399296de98d033f6b1a031c706f"
+content-hash = "ef985cc097d48d6f114d2c156e149543c4437e74a9fa80f9aaae90a1d08146d1"

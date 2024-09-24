@@ -23,7 +23,6 @@ def execute_sql(conn, sql, params=None):
             cur.execute(sql)
         conn.commit()
         result = cur.fetchall()
-        print(f"Result: {result}")
         return result
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -95,6 +94,7 @@ def create_table(conn):
                 binary_content BLOB,
                 text_content TEXT,
                 file_name TEXT,
+                file_size INTEGER,
                 timestamp_of_upload TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (organization_id) REFERENCES organizations (id),
                 FOREIGN KEY (user_upload_id) REFERENCES users (id)

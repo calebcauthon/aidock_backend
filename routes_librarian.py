@@ -1,10 +1,12 @@
-from flask import Blueprint, render_template, request, redirect, url_for, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, current_app, jsonify
 from werkzeug.utils import secure_filename
 from routes_auth_helpers import librarian_required
 from db.organization_model import OrganizationModel
 from db.conversation_model import ConversationModel
 from db.context_docs import ContextDocModel
 from db.file_model import FileModel  # Add this import
+from db.user_model import UserModel
+from flask_login import current_user, login_required
 import os
 
 librarian_routes = Blueprint('librarian', __name__)
@@ -50,7 +52,8 @@ def upload_file(librarian):
         user_upload_id=librarian['id'],
         binary_content=binary_content,
         text_content=text_content,
-        file_name=filename
+        file_name=filename,
+        file_size=os.path.getsize(file_path)
     )
 
     # Add the file to context docs if it's readable as text
@@ -64,9 +67,32 @@ def upload_file(librarian):
 
     return redirect(url_for('librarian.librarian_files'))
 
-@librarian_routes.route('/librarian/files')
+@librarian_routes.route('/librarian-files')
 @librarian_required
 def librarian_files(librarian):
     organization = OrganizationModel.get_organization(librarian['organization_id'])
     files = FileModel.get_files_for_organization(librarian['organization_id'])
     return render_template('librarian/librarian_files.html', librarian=librarian, organization=organization, files=files)
+
+@librarian_routes.route('/librarian/files', methods=['GET'])
+@librarian_required
+def get_organization_files(librarian):
+    org_id = librarian['organization_id']
+    
+    files = FileModel.get_files_for_organization(org_id)
+    users = UserModel.get_all_users()
+    users_dict = {user['id']: user['username'] for user in users}
+    print(f"users_dict: {users_dict}")
+    
+    file_list = []
+    for file in files:
+        file_list.append({
+            'id': file['id'],
+            'name': file['file_name'],
+            'size': file['file_size'],
+            'upload_date': file['timestamp_of_upload'],
+            'uploaded_by': file['user_upload_id'],
+            'user_name': users_dict[file['user_upload_id']]
+        })
+    
+    return jsonify(file_list)

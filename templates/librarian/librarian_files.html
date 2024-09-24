@@ -2,30 +2,98 @@
 
 {% block content %}
 <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
-<body>
-    <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
-</body>
-<div class="flex-1 p-10">
+<script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+<style>
+    table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+    }
+    th, td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    th {
+        background-color: #f8fafc;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        color: #4a5568;
+    }
+    tr:hover {
+        background-color: #f7fafc;
+    }
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+    .actions a {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+    .actions a:hover {
+        background-color: #edf2f7;
+    }
+</style>
+
+<div class="flex-1 p-10" ng-app="fileApp" ng-controller="FileController">
     <h1 class="text-3xl font-bold mb-6">Files</h1>
     
-    <div class="bg-white shadow-md rounded-lg p-6">
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
         <form action="[[ url_for('librarian.upload_file') ]]" method="POST" enctype="multipart/form-data">
             <input type="file" name="file" multiple class="mb-4" />
         </form>
     </div>
 
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <h2 class="text-2xl font-bold mb-4">Organization Files</h2>
+        <table class="w-full">
+            <thead>
+                <tr>
+                    <th>File Name</th>
+                    <th>Size</th>
+                    <th>Upload Date</th>
+                    <th>Uploaded By</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="file in files">
+                    <td>{[{ file.name }]}</td>
+                    <td>{[{ file.size }]} kb</td>
+                    <td>{[{ file.upload_date | date:'medium' }]}</td>
+                    <td>{[{ file.user_name }]} ([{[ file.user_id }]])</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
     <script>
-      // Get a reference to the file input element
-      const inputElement = document.querySelector('input[type="file"]');
+        // FilePond initialization
+        const inputElement = document.querySelector('input[type="file"]');
+        const pond = FilePond.create(inputElement, {
+            server: '/librarian/upload',
+        });
 
-      // Create a FilePond instance
-      const pond = FilePond.create(inputElement, {
-        server: '/librarian/upload',
-      });
+        // Angular app
+        angular.module('fileApp', [])
+            .config(function($interpolateProvider) {
+                $interpolateProvider.startSymbol('{[{');
+                $interpolateProvider.endSymbol('}]}');
+            })
+            .controller('FileController', function($scope, $http) {
+                $scope.files = [];
+
+                $http.get('/librarian/files')
+                    .then(function(response) {
+                        $scope.files = response.data;
+                    }, function(error) {
+                        console.error('Error fetching files:', error);
+                    });
+            });
     </script>
-
-
-
-    
 </div>
 {% endblock %}

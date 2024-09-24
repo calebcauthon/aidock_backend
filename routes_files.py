@@ -14,7 +14,6 @@ def list_files():
 
     users = UserModel.get_all_users()
     users_dict = {user['id']: user['username'] for user in users}
-
     files = FileModel.get_all_files()
     return render_template('superuser_ui/files.html', organizations=organizations_dict, users=users_dict, files=files)
 
