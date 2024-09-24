@@ -36,12 +36,19 @@ def edit_user(librarian, user_id):
     
     if request.method == 'POST':
         # Add user update logic here
-        UserModel.update_user(
-            user_id=user_id,
-            username=request.form['username'],
-            email=request.form['email'],
-            role=request.form['role']
-        )
+        update_data = {
+            'user_id': user_id,
+            'username': request.form['username'],
+            'email': request.form['email'],
+            'role': request.form['role']
+        }
+        
+        # Only update password if a new one is provided
+        new_password = request.form.get('password')
+        if new_password:
+            update_data['password'] = new_password
+
+        UserModel.update_user(**update_data)
         return redirect(url_for('librarian_users.librarian_users'))
 
     organization = OrganizationModel.get_organization(librarian['organization_id'])

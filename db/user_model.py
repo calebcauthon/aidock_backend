@@ -59,30 +59,26 @@ class UserModel:
             raise e
 
     @staticmethod
-    def update_user(user_id, username=None, email=None, role=None, organization_id=None):
+    def update_user(user_id, username, email, role, password=None):
         conn = create_connection()
-        update_fields = []
-        params = []
-        if username:
-            update_fields.append("username = ?")
-            params.append(username)
-        if email:
-            update_fields.append("email = ?")
-            params.append(email)
-        if role:
-            update_fields.append("role = ?")
-            params.append(role)
-        if organization_id:
-            update_fields.append("organization_id = ?")
-            params.append(organization_id)
-        
-        if update_fields:
+        update_fields = ["username = ?", "email = ?", "role = ?"]
+        params = [username, email, role, user_id]
 
-            update_query = f"UPDATE users SET {', '.join(update_fields)} WHERE id = ?"
-            params.append(user_id)
+        if password:
+            update_fields.append("password_hash = ?")
+            hashed_password = generate_password_hash(password)
+            params.insert(-1, hashed_password)
+
+        update_query = f"UPDATE users SET {', '.join(update_fields)} WHERE id = ?"
+
+        try:
             execute_sql(conn, update_query, tuple(params))
-        conn.close()
-        return True
+            conn.close()
+            return True
+        except Exception as e:
+            conn.close()
+            raise e
+
 
     @staticmethod
     def delete_user(user_id):
