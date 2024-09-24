@@ -12,7 +12,7 @@ from db.prompt_history import Datastore as PromptHistoryDatastore
 from routes_librarian import librarian_routes
 from routes_chat_prompt_for_dock import chat_prompt_routes
 
-app = Flask(__name__, static_folder='templates')
+app = Flask(__name__, static_folder='static')
 app.template_folder = 'templates'
 app.jinja_env.variable_start_string = '[['
 app.jinja_env.variable_end_string = ']]'

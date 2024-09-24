@@ -5,33 +5,22 @@
     <h1 class="text-3xl font-bold mb-6">Files</h1>
     
     <div class="bg-white shadow-md rounded-lg p-6">
-        {% if files %}
-            <table class="w-full">
-                <thead>
-                    <tr>
-                        <th class="text-left pb-4">File Name</th>
-                        <th class="text-left pb-4">Size</th>
-                        <th class="text-left pb-4">Last Modified</th>
-                        <th class="text-left pb-4">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for file in files %}
-                    <tr>
-                        <td class="py-2">{{ file.name }}</td>
-                        <td class="py-2">{{ file.size }}</td>
-                        <td class="py-2">{{ file.last_modified }}</td>
-                        <td class="py-2">
-                            <a href="#" class="text-blue-500 hover:underline">View</a>
-                            <a href="#" class="text-red-500 hover:underline ml-2">Delete</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p class="text-gray-500">No files found.</p>
-        {% endif %}
+        <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
+        <body>
+            <!-- other html -->
+    
+            <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
+        </body>
+
+        <input type="file" multiple />
+
+        <script>
+            // Get a reference to the file input element
+            const inputElement = document.querySelector('input[type="file"]');
+
+            // Create a FilePond instance
+            const pond = FilePond.create(inputElement);
+        </script>
     </div>
 </div>
 {% endblock %}
