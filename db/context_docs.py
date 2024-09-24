@@ -6,18 +6,22 @@ from db.init_db import execute_sql
 def get_relevant_context_docs(organization_id: int, url: str) -> List[str]:
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("SELECT id, url, document_name, document_text FROM context_docs WHERE organization_id = ?", (organization_id,))
+    cur.execute("""
+        SELECT text_content, file_name
+        FROM files 
+        WHERE organization_id = ?
+    """, (organization_id,))
     rows = cur.fetchall()
     conn.close()
     
     relevant_docs = [
         {
-            "id": row[0],
-            "url": row[1],
-            "document_name": row[2],
-            "document_text": row[3]
+            "id": "",
+            "url": "",
+            "document_name": row[1],
+            "document_text": row[0]
         }
-        for row in rows if row[1] in url or row[1] == '*'
+        for row in rows
     ]
     return relevant_docs if relevant_docs else []
 
