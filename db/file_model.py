@@ -2,6 +2,32 @@ from db.init_db import create_connection
 
 class FileModel:
     @staticmethod
+    def get_file_by_id(file_id):
+        conn = create_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT id, organization_id, user_upload_id, timestamp_of_upload, binary_content, text_content, file_name, file_size
+            FROM files
+            WHERE id = ?
+        """, (file_id,))
+        file = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if file:
+            return {
+                'id': file[0],
+                'organization_id': file[1],
+                'user_upload_id': file[2],
+                'timestamp_of_upload': file[3],
+                'binary_content': file[4],
+                'text_content': file[5],
+                'file_name': file[6],
+                'file_size': file[7]
+            }
+        return None
+
+    @staticmethod
     def add_file(organization_id, user_upload_id, binary_content, text_content, file_name, file_size):
         conn = create_connection()
         cur = conn.cursor()

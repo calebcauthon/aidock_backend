@@ -96,3 +96,16 @@ def get_organization_files(librarian):
         })
     
     return jsonify(file_list)
+
+@librarian_routes.route('/librarian/delete_file/<int:file_id>', methods=['POST'])
+@librarian_required
+def delete_file(librarian,file_id):
+    file = FileModel.get_file_by_id(file_id)
+    
+    if file and file['organization_id'] == librarian['organization_id']:
+        if FileModel.delete_file(file_id):
+            return jsonify({'success': True, 'message': 'File deleted successfully'})
+        else:
+            return jsonify({'success': False, 'message': 'Failed to delete file'}), 500
+    else:
+        return jsonify({'success': False, 'message': 'File not found or you do not have permission to delete it'}), 404

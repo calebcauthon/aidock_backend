@@ -20,6 +20,7 @@ def list_files():
 @files_routes.route('/files/delete/<int:file_id>', methods=['POST'])
 @platform_admin_required
 def delete_file(file_id):
+    print(f"Deleting file with ID: {file_id}")
     if FileModel.delete_file(file_id):
         flash('File deleted successfully', 'success')
     else:
