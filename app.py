@@ -19,6 +19,19 @@ app.jinja_env.variable_end_string = ']]'
 
 CORS(app)
 
+# Configure upload folder
+app.config['UPLOAD_FOLDER'] = os.path.join(app.static_folder, 'files')
+# Define allowed file extensions
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx'}
+
+# Function to check if a filename has an allowed extension
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
+
+
 # Database connection function
 def create_connection():
     db_url = os.environ.get("DATABASE_URL")

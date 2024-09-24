@@ -1,26 +1,27 @@
 {% extends "base_librarian.html" %}
 
 {% block content %}
+<link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
+<body>
+    <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
+</body>
 <div class="flex-1 p-10">
     <h1 class="text-3xl font-bold mb-6">Files</h1>
     
     <div class="bg-white shadow-md rounded-lg p-6">
-        <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
-        <body>
-            <!-- other html -->
-    
-            <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
-        </body>
-
-        <input type="file" multiple />
-
-        <script>
-            // Get a reference to the file input element
-            const inputElement = document.querySelector('input[type="file"]');
-
-            // Create a FilePond instance
-            const pond = FilePond.create(inputElement);
-        </script>
+        <form action="[[ url_for('librarian.upload_file') ]]" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" multiple class="mb-4" />
+        </form>
     </div>
+
+    <script>
+      // Get a reference to the file input element
+      const inputElement = document.querySelector('input[type="file"]');
+
+      // Create a FilePond instance
+      const pond = FilePond.create(inputElement, {
+        server: '/librarian/upload',
+      });
+    </script>
 </div>
 {% endblock %}
