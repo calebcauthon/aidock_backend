@@ -71,7 +71,7 @@
             <tbody>
                 <tr ng-repeat="file in files">
                     <td>{[{ file.name }]}</td>
-                    <td>{[{ file.size }]} kb</td>
+                    <td>{[{ formatFileSize(file.size) }]}</td>
                     <td>{[{ file.upload_date | date:'medium' }]}</td>
                     <td>{[{ file.user_name }]}</td>
                     <td>
@@ -127,6 +127,16 @@
                                 console.error('Error deleting file:', error);
                                 alert('An error occurred while deleting the file.');
                             });
+                    }
+                };
+
+                $scope.formatFileSize = function(bytes) {
+                    if (bytes >= 1048576) {
+                        return (bytes / 1048576).toFixed(2) + ' MB';
+                    } else if (bytes >= 1024) {
+                        return (bytes / 1024).toFixed(2) + ' KB';
+                    } else {
+                        return bytes + ' bytes';
                     }
                 };
 
