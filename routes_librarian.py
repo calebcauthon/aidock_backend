@@ -49,7 +49,8 @@ def upload_file(librarian):
         organization_id=librarian['organization_id'],
         user_upload_id=librarian['id'],
         binary_content=binary_content,
-        text_content=text_content
+        text_content=text_content,
+        file_name=filename
     )
 
     # Add the file to context docs if it's readable as text

@@ -94,6 +94,7 @@ def create_table(conn):
                 user_upload_id INTEGER NOT NULL,
                 binary_content BLOB,
                 text_content TEXT,
+                file_name TEXT,
                 timestamp_of_upload TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (organization_id) REFERENCES organizations (id),
                 FOREIGN KEY (user_upload_id) REFERENCES users (id)
