@@ -11,7 +11,7 @@ def create_connection():
     else:
         # Fallback to SQLite
         import sqlite3
-        return sqlite3.connect('lavendel.db')
+        return sqlite3.connect(os.environ.get('SQLITE_FILEPATH', 'lavendel.db'))
 
 
 def execute_sql(conn, sql, params=None):
