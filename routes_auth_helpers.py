@@ -27,8 +27,6 @@ def platform_admin_required(f):
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session or session.get('role') != 'platform_admin':
             flash('You do not have admin permission to access this page.', 'error')
-            print(f"User ID from session: {session.get('user_id')}")
-            print(f"Role from session: {session.get('role')}")
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
     return decorated_function

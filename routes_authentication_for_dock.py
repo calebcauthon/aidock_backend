@@ -26,7 +26,10 @@ def login():
             session['organization_id'] = user[0][4]
 
             flash('Logged in successfully.', 'success')
-            return redirect(url_for('librarian.librarian_home'))
+            if session['role'] == 'platform_admin':
+                return redirect(url_for('prompt_history'))
+            else:
+                return redirect(url_for('librarian.librarian_home'))
         else:
             flash(f'Invalid username or password, username: {username}, password: [{password}]', 'error')
     
