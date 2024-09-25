@@ -32,8 +32,11 @@ def create_user():
         role = request.form.get('role')
         organization_id = request.form.get('organization_id')
         
-        if not username or not email or not password:
+        if not username or not email or not password or not role or not organization_id:
             return jsonify({"error": "Missing required fields"}), 400
+        
+        if role not in ['librarian', 'user']:
+            return jsonify({"error": "Invalid role selected"}), 400
         
         try:
             UserModel.create_user(username, email, password, role, organization_id)

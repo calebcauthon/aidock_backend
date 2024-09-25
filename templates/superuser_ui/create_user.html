@@ -20,7 +20,11 @@
         <input type="password" id="password" name="password" required>
         
         <label for="role">Role:</label>
-        <input type="text" id="role" name="role" required>
+        <select id="role" name="role" required>
+            <option value="">Select a role</option>
+            <option value="librarian">Librarian</option>
+            <option value="user">User</option>
+        </select>
         
         <label for="organization_id">Organization:</label>
         <select id="organization_id" name="organization_id" required>
