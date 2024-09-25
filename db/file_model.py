@@ -101,7 +101,7 @@ class FileModel:
                 'organization_id': file[1],
                 'user_upload_id': file[2],
                 'timestamp_of_upload': file[3],
-                'text_content': file[4],
+                'text_content': file[4] if file[4] else '(no text content)',
                 'file_name': file[5],
                 'file_size': file[6]
             }
