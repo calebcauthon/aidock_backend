@@ -30,20 +30,18 @@ def upload_file(librarian):
     if file.filename == '':
         return redirect(url_for('librarian.librarian_files'))
     
-    filename = secure_filename(file.filename)
-    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-    file.save(file_path)
-    
-    # Read the content of the file
-    with open(file_path, 'rb') as f:
-        binary_content = f.read()
-    
-    # Try to read the file as text
-    try:
-        with open(file_path, 'r') as f:
-            text_content = f.read()
-    except UnicodeDecodeError:
-        text_content = None  # File is not readable as text
+    binary_content = file.read()
+    encodings = ['utf-8', 'iso-8859-1', 'windows-1252', 'ascii']
+    text_content = None
+    for encoding in encodings:
+        try:
+            text_content = binary_content.decode(encoding)
+            break
+        except UnicodeDecodeError:
+            print(f"Failed to decode with {encoding}")
+            continue
+    filename = file.filename
+    file_size = len(binary_content)
     
     # Add the file to the files table
     FileModel.add_file(
@@ -52,7 +50,7 @@ def upload_file(librarian):
         binary_content=binary_content,
         text_content=text_content,
         file_name=filename,
-        file_size=os.path.getsize(file_path)
+        file_size=file_size
     )
 
     # Add the file to context docs if it's readable as text
