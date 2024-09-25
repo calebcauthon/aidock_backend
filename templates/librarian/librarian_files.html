@@ -75,11 +75,29 @@
                     <td>{[{ file.upload_date | date:'medium' }]}</td>
                     <td>{[{ file.user_name }]}</td>
                     <td>
+                        <button ng-click="previewFile(file.id)" class="text-blue-500 hover:text-blue-700 mr-2">Preview</button>
                         <button ng-click="deleteFile(file.id)" class="text-red-500 hover:text-red-700">Delete</button>
                     </td>
                 </tr>
             </tbody>
         </table>
+    </div>
+
+    <!-- File Preview Overlay -->
+    <div id="filePreviewOverlay" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" style="display: none;">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900" id="previewFileName"></h3>
+                <div class="mt-2 px-7 py-3">
+                    <pre id="fileContent" class="text-sm text-gray-500 whitespace-pre-wrap break-words max-h-96 overflow-y-auto"></pre>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="closePreview" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -130,6 +148,18 @@
                     }
                 };
 
+                $scope.previewFile = function(fileId) {
+                    $http.get('/librarian/preview_file/' + fileId)
+                        .then(function(response) {
+                            document.getElementById('previewFileName').textContent = response.data.name;
+                            document.getElementById('fileContent').textContent = response.data.content;
+                            document.getElementById('filePreviewOverlay').style.display = 'block';
+                        }, function(error) {
+                            console.error('Error previewing file:', error);
+                            alert('An error occurred while previewing the file.');
+                        });
+                };
+
                 $scope.formatFileSize = function(bytes) {
                     if (bytes >= 1048576) {
                         return (bytes / 1048576).toFixed(2) + ' MB';
@@ -141,6 +171,11 @@
                 };
 
             });
+
+        // Close preview overlay
+        document.getElementById('closePreview').addEventListener('click', function() {
+            document.getElementById('filePreviewOverlay').style.display = 'none';
+        });
     </script>
 </div>
 {% endblock %}

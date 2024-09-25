@@ -106,3 +106,12 @@ def delete_file(librarian,file_id):
             return jsonify({'success': False, 'message': 'Failed to delete file'}), 500
     else:
         return jsonify({'success': False, 'message': 'File not found or you do not have permission to delete it'}), 404
+
+@librarian_routes.route('/librarian/preview_file/<int:file_id>', methods=['GET'])
+@librarian_required
+def preview_file(librarian, file_id):
+    file = FileModel.get_file_content(file_id)
+    if not file:
+        return jsonify({"error": f"File with id {file_id} not found"}), 404
+
+    return jsonify({"name": file['name'], "content": file['text_content']})

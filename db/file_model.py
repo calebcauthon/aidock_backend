@@ -126,3 +126,26 @@ class FileModel:
         finally:
             cur.close()
             conn.close()
+
+    @staticmethod
+    def get_file_content(file_id):
+        conn = create_connection()
+        cur = conn.cursor()
+        try:
+            cur.execute("SELECT file_name, text_content, binary_content FROM files WHERE id = ?", (file_id,))
+            result = cur.fetchone()
+            if result:
+                name, text_content, binary_content = result
+                return {
+                    'name': name,
+                    'text_content': text_content,
+                    'binary_content': binary_content
+                }
+            else:
+                return None
+        except Exception as e:
+            print(f"Error retrieving file content: {e}")
+            return None
+        finally:
+            cur.close()
+            conn.close()
