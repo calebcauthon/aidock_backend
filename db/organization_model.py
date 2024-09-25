@@ -18,10 +18,10 @@ class OrganizationModel:
     @staticmethod
     def get_all_organizations():
         conn = create_connection()
-        orgs = execute_sql(conn, "SELECT id, name, description FROM organizations")
-        orgs = [{"id": org[0], "name": org[1], "description": org[2]} for org in orgs]
+        query = "SELECT id, name FROM organizations"
+        organizations = execute_sql(conn, query)
+        orgs = [{"id": org[0], "name": org[1]} for org in organizations]
         conn.close()
-
         return orgs
 
     @staticmethod

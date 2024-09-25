@@ -4,6 +4,7 @@ import uuid
 from db.user_model import UserModel
 from db.init_db import create_connection, execute_sql
 from routes_auth_helpers import platform_admin_required
+from db.organization_model import OrganizationModel  # Add this import at the top
 
 user_routes = Blueprint('user_routes', __name__)
 
@@ -40,7 +41,9 @@ def create_user():
         except Exception as e:
             return jsonify({"error": str(e)}), 500
     
-    return render_template('superuser_ui/create_user.html')
+    # Fetch all organizations
+    organizations = OrganizationModel.get_all_organizations()
+    return render_template('superuser_ui/create_user.html', organizations=organizations)
 
 @user_routes.route('/<int:user_id>/edit', methods=['GET', 'POST'])
 @platform_admin_required
