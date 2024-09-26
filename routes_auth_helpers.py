@@ -8,9 +8,6 @@ def authenticate_user_with_token(func):
         from functools import wraps
         from db.user_model import UserModel
 
-        print("All headers:")
-        for header, value in request.headers.items():
-            print(f"{header}: {value}")
         login_token = request.headers.get('login_token')
         if not login_token:
             return jsonify({"error": "No login token provided"}), 401
