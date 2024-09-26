@@ -1,5 +1,6 @@
 import sqlite3
 import psycopg2
+from db.init_db import create_connection, execute_sql
 
 class Datastore:
     def __init__(self, db_connection):
@@ -47,3 +48,14 @@ class Datastore:
     def close_connection(self):
         if self.conn:
             self.conn.close()
+
+def save_prompt_history(url, system_prompt, question, answer, user_id):
+    conn = create_connection()
+    if conn is not None:
+        try:
+            execute_sql(conn, 
+                "INSERT INTO prompt_history (url, prompt, response, user_id) VALUES (?, ?, ?, ?)",
+                (url, f"SYSTEM PROMPT: {system_prompt} | USER QUESTION: {question}", answer, user_id)
+            )
+        finally:
+            conn.close()
