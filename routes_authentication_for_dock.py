@@ -1,7 +1,6 @@
 from flask import Blueprint, request, redirect, url_for, render_template, flash, session
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import check_password_hash
 from db.init_db import create_connection, execute_sql
-from functools import wraps
 
 auth = Blueprint('auth', __name__)
 
@@ -34,8 +33,6 @@ def login():
             flash(f'Invalid username or password, username: {username}, password: [{password}]', 'error')
     
     return render_template('login.html')
-
-
 
 @auth.route('/logout')
 def logout():
