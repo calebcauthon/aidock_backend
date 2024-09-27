@@ -6,10 +6,10 @@
         
         <div class="pagination">
             {% if has_prev %}
-                <a href="[[ url_for('prompt_history', offset=prev_offset) ]]" class="pagination-link">Previous</a>
+                <a href="[[ url_for('platform_admin_pages.prompt_history', offset=prev_offset) ]]" class="pagination-link">Previous</a>
             {% endif %}
             {% if has_next %}
-                <a href="[[ url_for('prompt_history', offset=next_offset) ]]" class="pagination-link">Next</a>
+                <a href="[[ url_for('platform_admin_pages.prompt_history', offset=next_offset) ]]" class="pagination-link">Next</a>
             {% endif %}
         </div>
 
@@ -33,10 +33,10 @@
             
             <div class="pagination">
                 {% if has_prev %}
-                    <a href="[[ url_for('prompt_history', offset=prev_offset) ]]" class="pagination-link">Previous</a>
+                    <a href="[[ url_for('platform_admin_pages.prompt_history', offset=prev_offset) ]]" class="pagination-link">Previous</a>
                 {% endif %}
                 {% if has_next %}
-                    <a href="[[ url_for('prompt_history', offset=next_offset) ]]" class="pagination-link">Next</a>
+                    <a href="[[ url_for('platform_admin_pages.prompt_history', offset=next_offset) ]]" class="pagination-link">Next</a>
                 {% endif %}
             </div>
         {% else %}
