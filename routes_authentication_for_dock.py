@@ -26,7 +26,7 @@ def authenticate():
             "token": login_token,
             "role": user['role'],
             "organization_id": user['organization_id'],
-            "organization_name": organization['name']
+            "organization_name": organization['name'] if organization else None
         }), 200
     
     return jsonify({"error": "Invalid username or password"}), 401

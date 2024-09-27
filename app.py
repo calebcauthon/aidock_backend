@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory, render_template, url_for, redirect
+from flask import Flask, request, jsonify, send_from_directory, render_template, url_for, redirect, session
 import os
 from flask_cors import CORS
 from routes_context_docs_for_platform_admin import context_docs, create_connection
@@ -15,6 +15,7 @@ from routes_librarian_users import librarian_users_routes
 from routes_platform_admin_pages import platform_admin_pages  # Add this import
 from routes_auth_for_admin_pages import auth_admin
 from routes_profile import profile_routes
+from db.user_model import UserModel
 
 app = Flask(__name__, static_folder='static')
 app.template_folder = 'templates'
@@ -68,6 +69,21 @@ app.register_blueprint(auth_admin)
 app.register_blueprint(profile_routes)
 
 app.secret_key = os.environ.get("SECRET_KEY", "your_fallback_secret_key")
+
+@app.route('/me', methods=['GET'])
+def get_session_user_info():
+    user_info = {
+        "user_id": session.get('user_id'),
+        "role": session.get('role'),
+    }
+
+    if session.get('user_id'):
+        user = UserModel.get_user(session['user_id'])
+        login_token = user['login_token']
+        user_info['login_token'] = login_token
+        user_info['username'] = user['username']
+
+    return jsonify(user_info)
 
 @app.route('/')
 def home():

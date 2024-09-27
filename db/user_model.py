@@ -38,8 +38,8 @@ class UserModel:
     @staticmethod
     def get_user(user_id):
         conn = create_connection()
-        user = execute_sql(conn, "SELECT id, username, email, role, organization_id FROM users WHERE id = ?", (user_id,))
-        user = {"id": user[0][0], "username": user[0][1], "email": user[0][2], "role": user[0][3], "organization_id": user[0][4]} if user else None
+        user = execute_sql(conn, "SELECT id, username, email, role, organization_id, login_token FROM users WHERE id = ?", (user_id,))
+        user = {"id": user[0][0], "username": user[0][1], "email": user[0][2], "role": user[0][3], "organization_id": user[0][4], "login_token": user[0][5]} if user else None
         conn.close()
 
         return user if user else None
