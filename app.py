@@ -58,10 +58,10 @@ app.register_blueprint(user_routes, url_prefix='/users')
 app.register_blueprint(organization_routes, url_prefix='/organizations')
 app.register_blueprint(auth)
 app.register_blueprint(librarian_routes)
-app.register_blueprint(files_routes)  # Add this line
+app.register_blueprint(files_routes)
 app.register_blueprint(chat_prompt_routes)
 app.register_blueprint(librarian_users_routes)
-app.register_blueprint(platform_admin_pages)  # Add this line
+app.register_blueprint(platform_admin_pages)
 
 app.secret_key = os.environ.get("SECRET_KEY", "your_fallback_secret_key")
 
