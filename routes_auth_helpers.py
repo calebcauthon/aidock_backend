@@ -20,6 +20,17 @@ def authenticate_user_with_token(func):
         return func(user, *args, **kwargs)
     return wrapper
 
+def user_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session and session.get('role') not in ['user', 'librarian', 'platform_admin']:
+            flash('You do not have user permission to access this page.', 'error')
+            return redirect(url_for('auth_admin.login'))
+
+        user = UserModel.get_user(session['user_id'])
+        return f(user, *args, **kwargs)
+    return decorated_function
+
 def platform_admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
