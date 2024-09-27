@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory, render_template, url_for
+from flask import Flask, request, jsonify, send_from_directory, render_template, url_for, redirect, session
 import os
 from flask_cors import CORS
 from routes_context_docs_for_platform_admin import context_docs, create_connection
@@ -7,12 +7,15 @@ from routes_user_crud_for_platform_admin import user_routes
 from routes_organization_crud_for_platform_admin import organization_routes
 from db.init_db import create_table
 import psycopg2
-from routes_authentication_for_dock import auth
-from db.prompt_history import Datastore as PromptHistoryDatastore
+from routes_authentication_for_dock import auth_dock
 from routes_librarian import librarian_routes
 from routes_chat_prompt_for_dock import chat_prompt_routes
 from routes_files import files_routes
 from routes_librarian_users import librarian_users_routes
+from routes_platform_admin_pages import platform_admin_pages  # Add this import
+from routes_auth_for_admin_pages import auth_admin
+from routes_profile import profile_routes
+from db.user_model import UserModel
 
 app = Flask(__name__, static_folder='static')
 app.template_folder = 'templates'
@@ -56,60 +59,35 @@ app.register_blueprint(context_docs, url_prefix='/context_docs')
 app.register_blueprint(prompt_routes)
 app.register_blueprint(user_routes, url_prefix='/users')
 app.register_blueprint(organization_routes, url_prefix='/organizations')
-app.register_blueprint(auth)
 app.register_blueprint(librarian_routes)
-app.register_blueprint(files_routes)  # Add this line
+app.register_blueprint(files_routes)
 app.register_blueprint(chat_prompt_routes)
 app.register_blueprint(librarian_users_routes)
+app.register_blueprint(platform_admin_pages)
+app.register_blueprint(auth_dock)
+app.register_blueprint(auth_admin)
+app.register_blueprint(profile_routes)
 
 app.secret_key = os.environ.get("SECRET_KEY", "your_fallback_secret_key")
 
-@app.route('/hello')
-def hello_world():
-    return "Hello, World!"
+@app.route('/me', methods=['GET'])
+def get_session_user_info():
+    user_info = {
+        "user_id": session.get('user_id'),
+        "role": session.get('role'),
+    }
 
-@app.route('/history')
-def prompt_history():
-    conn = create_connection()
-    datastore = PromptHistoryDatastore(conn)
+    if session.get('user_id'):
+        user = UserModel.get_user(session['user_id'])
+        login_token = user['login_token']
+        user_info['login_token'] = login_token
+        user_info['username'] = user['username']
 
-    offset = request.args.get('offset', type=int, default=0)
-    limit = 1
+    return jsonify(user_info)
 
-    history = datastore.get_prompt_history(offset, limit)
-    return render_template('superuser_ui/prompt_history.html', 
-                            entry=history['entry'],
-                            has_prev=history['has_prev'],
-                            has_next=history['has_next'],
-                            prev_offset=history['prev_offset'],
-                            next_offset=history['next_offset'])
-
-@app.route('/context_docs/<int:doc_id>', methods=['GET'])
-def get_context_document(doc_id):
-    conn = create_connection()
-    if conn is not None:
-        try:
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM context_docs WHERE id = ?", (doc_id,))
-            doc = cursor.fetchone()
-            cursor.close()
-            if doc:
-                return jsonify({
-                    'id': doc[0],
-                    'url': doc[1],
-                    'document_name': doc[2],
-                    'document_text': doc[3],
-                    'scope': doc[4],  # Assuming you have a scope column
-                    # Add other fields as necessary
-                })
-            else:
-                return jsonify({"error": "Document not found"}), 404
-        except (psycopg2.Error) as e:
-            return jsonify({"error": str(e)}), 500
-        finally:
-            conn.close()
-    else:
-        return jsonify({"error": "Unable to connect to the database"}), 500
+@app.route('/')
+def home():
+    return redirect(url_for('platform_admin_pages.prompt_history'))
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

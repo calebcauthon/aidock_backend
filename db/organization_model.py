@@ -61,3 +61,39 @@ class OrganizationModel:
         execute_sql(conn, "DELETE FROM organizations WHERE id = ?", (org_id,))
         conn.close()
         return True
+
+    @staticmethod
+    def get_organization_websites(org_id):
+        conn = create_connection()
+        query = "SELECT id, url FROM organization_websites WHERE organization_id = ?"
+        websites = execute_sql(conn, query, (org_id,))
+        conn.close()
+        return [{'id': row[0], 'url': row[1]} for row in websites]
+
+    @staticmethod
+    def add_organization_website(org_id, url):
+        conn = create_connection()
+        try:
+            execute_sql(conn, "INSERT INTO organization_websites (organization_id, url) VALUES (?, ?)", 
+                        (org_id, url))
+            conn.close()
+            return True
+        except Exception as e:
+            conn.close()
+            raise e
+
+    @staticmethod
+    def remove_organization_website(org_id, website_id):
+        conn = create_connection()
+        execute_sql(conn, "DELETE FROM organization_websites WHERE id = ? AND organization_id = ?", 
+                    (website_id, org_id))
+        conn.close()
+        return True
+
+    @staticmethod
+    def check_website(current_url):
+        conn = create_connection()
+        query = "SELECT organization_id FROM organization_websites WHERE ? LIKE '%' || url || '%'"
+        result = execute_sql(conn, query, (current_url,))
+        conn.close()
+        return result[0][0] if result else None
