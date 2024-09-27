@@ -1,11 +1,30 @@
 {% extends "base_librarian.html" %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1>User Profile</h1>
-    <div id="profile-info">
-      <p>Username: [[ user['username'] ]]</p>
-      <p>Role: [[ user['role'] ]]</p>
+<div class="flex-1 p-8">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-bold mb-6">User Profile</h2>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <span>[[ user['username'] ]] | [[ user['role'] ]]</span>
+                <a href="[[ url_for('auth_admin.logout') ]]" class="text-blue-500 hover:text-blue-700">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <table class="w-full">
+            <tbody>
+                <tr class="border-t">
+                    <td class="py-2 font-semibold">Username:</td>
+                    <td class="py-2">[[ user['username'] ]]</td>
+                </tr>
+                <tr class="border-t">
+                    <td class="py-2 font-semibold">Role:</td>
+                    <td class="py-2">[[ user['role'] ]]</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}
