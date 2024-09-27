@@ -3,6 +3,13 @@ from werkzeug.security import generate_password_hash
 
 class UserModel:
     @staticmethod
+    def clear_login_token(user_id):
+        conn = create_connection()
+        execute_sql(conn, "UPDATE users SET login_token = NULL WHERE id = ?", (user_id,))
+        conn.close()
+        return True
+
+    @staticmethod
     def get_users_for_organization(organization_id):
         conn = create_connection()
         users = execute_sql(conn, "SELECT id, username, email, role FROM users WHERE organization_id = ?", (organization_id,))
@@ -38,8 +45,8 @@ class UserModel:
     @staticmethod
     def get_user(user_id):
         conn = create_connection()
-        user = execute_sql(conn, "SELECT id, username, email, role, organization_id FROM users WHERE id = ?", (user_id,))
-        user = {"id": user[0][0], "username": user[0][1], "email": user[0][2], "role": user[0][3], "organization_id": user[0][4]} if user else None
+        user = execute_sql(conn, "SELECT id, username, email, role, organization_id, login_token FROM users WHERE id = ?", (user_id,))
+        user = {"id": user[0][0], "username": user[0][1], "email": user[0][2], "role": user[0][3], "organization_id": user[0][4], "login_token": user[0][5]} if user else None
         conn.close()
 
         return user if user else None
@@ -90,8 +97,8 @@ class UserModel:
     @staticmethod
     def get_user_by_username(username):
         conn = create_connection()
-        user = execute_sql(conn, "SELECT id, username, email, password_hash FROM users WHERE username = ?", (username,))
-        user = {"id": user[0][0], "username": user[0][1], "email": user[0][2], "password_hash": user[0][3]} if user else None
+        user = execute_sql(conn, "SELECT id, username, email, password_hash, organization_id, role FROM users WHERE username = ?", (username,))
+        user = {"id": user[0][0], "username": user[0][1], "email": user[0][2], "password_hash": user[0][3], "organization_id": user[0][4], "role": user[0][5]} if user else None
         conn.close()
 
         return user if user else None
@@ -100,6 +107,14 @@ class UserModel:
     def update_login_token(user_id, login_token):
         conn = create_connection()
         execute_sql(conn, "UPDATE users SET login_token = ? WHERE id = ?", (login_token, user_id))
+        conn.close()
+        return True
+
+    
+    @staticmethod
+    def update_username(user_id, new_username):
+        conn = create_connection()
+        execute_sql(conn, "UPDATE users SET username = ? WHERE id = ?", (new_username, user_id))
         conn.close()
         return True
 

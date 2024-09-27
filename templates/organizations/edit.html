@@ -14,4 +14,87 @@
         </div>
         <button type="submit" class="btn">Update Organization</button>
     </form>
+
+    <h2>Organization Websites</h2>
+    <div id="websiteList">
+        <!-- Website list will be populated here -->
+    </div>
+    <div class="form-group">
+        <input type="text" id="newWebsite" placeholder="Enter new website URL">
+        <button id="addWebsite" class="btn">Add Website</button>
+    </div>
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        const websiteList = document.getElementById('websiteList');
+        const newWebsiteInput = document.getElementById('newWebsite');
+        const addWebsiteButton = document.getElementById('addWebsite');
+        const organizationId = [[ organization[0] ]];
+
+        function loadWebsites() {
+            fetch(`/api/organization/${organizationId}/websites`)
+                .then(response => response.json())
+                .then(websites => {
+                    websiteList.innerHTML = '';
+                    websites.forEach(website => {
+                        const websiteElement = document.createElement('div');
+                        websiteElement.innerHTML = `
+                            ${website.url}
+                            <button class="removeWebsite" data-id="${website.id}">Remove</button>
+                        `;
+                        websiteList.appendChild(websiteElement);
+                    });
+                    addRemoveListeners();
+                });
+        }
+
+        function addRemoveListeners() {
+            document.querySelectorAll('.removeWebsite').forEach(button => {
+                button.addEventListener('click', function() {
+                    const websiteId = this.getAttribute('data-id');
+                    removeWebsite(websiteId);
+                });
+            });
+        }
+
+        function addWebsite() {
+            const url = newWebsiteInput.value.trim();
+            if (url) {
+                fetch(`/api/organization/${organizationId}/websites`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url }),
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        loadWebsites();
+                        newWebsiteInput.value = '';
+                    } else {
+                        alert('Failed to add website: ' + result.message);
+                    }
+                });
+            }
+        }
+
+        function removeWebsite(websiteId) {
+            fetch(`/api/organization/${organizationId}/websites/${websiteId}`, {
+                method: 'DELETE',
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    loadWebsites();
+                } else {
+                    alert('Failed to remove website: ' + result.message);
+                }
+            });
+        }
+
+        addWebsiteButton.addEventListener('click', addWebsite);
+        loadWebsites();
+    });
+</script>
 {% endblock %}

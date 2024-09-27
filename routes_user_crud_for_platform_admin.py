@@ -83,24 +83,6 @@ def delete_user(user_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@user_routes.route('/authenticate', methods=['POST'])
-def authenticate():
-    data = request.json
-    username = data.get('username')
-    password = data.get('password')
-    
-    if not username or not password:
-        return jsonify({"error": "Missing username or password"}), 400
-    
-    user = UserModel.get_user_by_username(username)
-    
-    if user and check_password_hash(user['password_hash'], password):
-        login_token = str(uuid.uuid4())
-        UserModel.update_login_token(user['id'], login_token)
-        return jsonify({"message": "Authentication successful", "token": login_token}), 200
-    
-    return jsonify({"error": "Invalid username or password"}), 401
-
 @user_routes.route('/initialize_super_user', methods=['GET'])
 def initialize_super_user():
     try:
