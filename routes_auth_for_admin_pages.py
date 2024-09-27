@@ -1,6 +1,7 @@
 from flask import Blueprint, request, redirect, url_for, render_template, flash, session
 from werkzeug.security import check_password_hash
 from db.init_db import create_connection, execute_sql
+from routes_auth_helpers import set_librarian_session
 
 auth_admin = Blueprint('auth_admin', __name__)
 
@@ -20,9 +21,7 @@ def login():
         
         password_hash = user[0][2]
         if user and check_password_hash(password_hash, password):
-            session['user_id'] = user[0][0]
-            session['role'] = user[0][3]
-            session['organization_id'] = user[0][4]
+            set_librarian_session(user[0])
 
             flash('Logged in successfully.', 'success')
             if session['role'] == 'platform_admin':
