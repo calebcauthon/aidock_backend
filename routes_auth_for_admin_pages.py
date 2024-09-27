@@ -35,6 +35,7 @@ def login():
 
 @auth_admin.route('/logout')
 def logout():
+    UserModel.clear_login_token(session.get('user_id'))
     session.clear()
     flash('Logged out successfully.', 'success')
     return redirect(url_for('auth_admin.login'))
