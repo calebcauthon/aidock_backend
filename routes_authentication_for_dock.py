@@ -30,3 +30,18 @@ def authenticate():
         }), 200
     
     return jsonify({"error": "Invalid username or password"}), 401
+
+@auth_dock.route('/verify', methods=['POST'])
+def verify_token():
+    data = request.json
+    login_token = data.get('token')
+    
+    if not login_token:
+        return jsonify({"error": "Missing login token"}), 400
+    
+    user = UserModel.get_user_by_login_token(login_token)
+    
+    if user:
+        return jsonify({"isValid": True}), 200
+    else:
+        return jsonify({"isValid": False}), 200

@@ -2,6 +2,7 @@ from flask import Blueprint, request, redirect, url_for, render_template, flash,
 from werkzeug.security import check_password_hash
 from routes_auth_helpers import set_librarian_session
 from db.user_model import UserModel
+import uuid
 
 auth_admin = Blueprint('auth_admin', __name__)
 
@@ -19,6 +20,9 @@ def login():
         
         password_hash = user['password_hash']
         if user and check_password_hash(password_hash, password):
+            login_token = str(uuid.uuid4())
+            UserModel.update_login_token(user['id'], login_token)
+
             set_librarian_session(user)
 
             flash('Logged in successfully.', 'success')
