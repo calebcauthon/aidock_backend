@@ -91,9 +91,10 @@ class OrganizationModel:
         return True
 
     @staticmethod
-    def check_website(current_url):
+    def check_website(current_url, org_id):
         conn = create_connection()
-        query = "SELECT organization_id FROM organization_websites WHERE ? LIKE '%' || url || '%'"
-        result = execute_sql(conn, query, (current_url,))
+        query = "SELECT id FROM organization_websites WHERE ? LIKE '%' || url || '%' AND organization_id = ?"
+        params = (current_url, org_id)
+        result = execute_sql(conn, query, params)
         conn.close()
         return result[0][0] if result else None
