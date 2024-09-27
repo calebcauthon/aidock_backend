@@ -1,7 +1,7 @@
 from flask import Blueprint, request, redirect, url_for, render_template, flash, session, jsonify
 from werkzeug.security import check_password_hash
-from db.init_db import create_connection, execute_sql
 from db.user_model import UserModel
+from db.organization_model import OrganizationModel
 import uuid
 
 auth_dock = Blueprint('auth_dock', __name__)
@@ -18,8 +18,15 @@ def authenticate():
     user = UserModel.get_user_by_username(username)
     
     if user and check_password_hash(user['password_hash'], password):
+        organization = OrganizationModel.get_organization(user['organization_id'])
         login_token = str(uuid.uuid4())
         UserModel.update_login_token(user['id'], login_token)
-        return jsonify({"message": "Authentication successful", "token": login_token}), 200
+        return jsonify({
+            "message": "Authentication successful",
+            "token": login_token,
+            "role": user['role'],
+            "organization_id": user['organization_id'],
+            "organization_name": organization['name']
+        }), 200
     
     return jsonify({"error": "Invalid username or password"}), 401
