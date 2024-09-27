@@ -24,7 +24,7 @@ def platform_admin_required(f):
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session or session.get('role') != 'platform_admin':
             flash('You do not have admin permission to access this page.', 'error')
-            return redirect(url_for('auth.login'))
+            return redirect(url_for('auth_admin.login'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -33,14 +33,14 @@ def librarian_required(f):
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session or session.get('role') != 'librarian':
             flash('You do not have librarian permission to access this page.', 'error')
-            return redirect(url_for('auth.login'))
+            return redirect(url_for('auth_admin.login'))
         
         from db.user_model import UserModel
         user = UserModel.get_user(session['user_id'])
         
         if not user:
             flash('User not found.', 'error')
-            return redirect(url_for('auth.login'))
+            return redirect(url_for('auth_admin.login'))
         
         return f(user, *args, **kwargs)
     return decorated_function
