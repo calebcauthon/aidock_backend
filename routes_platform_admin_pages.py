@@ -2,11 +2,13 @@ from flask import Blueprint, render_template, jsonify, request
 from db.prompt_history import Datastore as PromptHistoryDatastore
 from db.init_db import create_connection
 from db.organization_model import OrganizationModel
+from routes_auth_helpers import platform_admin_required
 import psycopg2
 
 platform_admin_pages = Blueprint('platform_admin_pages', __name__)
 
 @platform_admin_pages.route('/history')
+@platform_admin_required
 def prompt_history():
     conn = create_connection()
     datastore = PromptHistoryDatastore(conn)
@@ -23,6 +25,7 @@ def prompt_history():
                             next_offset=history['next_offset'])
 
 @platform_admin_pages.route('/context_docs/<int:doc_id>', methods=['GET'])
+@platform_admin_required
 def get_context_document(doc_id):
     conn = create_connection()
     if conn is not None:
@@ -50,6 +53,7 @@ def get_context_document(doc_id):
         return jsonify({"error": "Unable to connect to the database"}), 500
 
 @platform_admin_pages.route('/api/organization/<int:org_id>/websites', methods=['GET'])
+@platform_admin_required
 def get_organization_websites(org_id):
     try:
         websites = OrganizationModel.get_organization_websites(org_id)
@@ -58,6 +62,7 @@ def get_organization_websites(org_id):
         return jsonify({"error": str(e)}), 500
 
 @platform_admin_pages.route('/api/organization/<int:org_id>/websites', methods=['POST'])
+@platform_admin_required
 def add_organization_website(org_id):
     try:
         data = request.json
@@ -71,6 +76,7 @@ def add_organization_website(org_id):
         return jsonify({"success": False, "message": str(e)}), 500
 
 @platform_admin_pages.route('/api/organization/<int:org_id>/websites/<int:website_id>', methods=['DELETE'])
+@platform_admin_required
 def remove_organization_website(org_id, website_id):
     try:
         OrganizationModel.remove_organization_website(org_id, website_id)
@@ -81,11 +87,12 @@ def remove_organization_website(org_id, website_id):
 @platform_admin_pages.route('/api/websites', methods=['GET'])
 def check_website():
     current_url = request.args.get('url')
+    org_id = request.args.get('organization_id')
     if not current_url:
         return jsonify({"error": "URL parameter is required"}), 400
 
     try:
-        organization_id = OrganizationModel.check_website(current_url)
+        organization_id = OrganizationModel.check_website(current_url, org_id)
         if organization_id:
             return jsonify({"is_organization_website": True, "organization_id": organization_id})
         else:

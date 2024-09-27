@@ -75,6 +75,7 @@ def get_session_user_info():
     user_info = {
         "user_id": session.get('user_id'),
         "role": session.get('role'),
+        "organization_id": session.get('organization_id')
     }
 
     if session.get('user_id'):
