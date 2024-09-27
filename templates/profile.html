@@ -1,30 +1,44 @@
-{% extends "base_librarian.html" %}
+{% if session['role'] == 'librarian' %}
+  {% extends "base_librarian.html" %}
+{% else %}
+  {% extends "base_user.html" %}
+{% endif %}
 
 {% block content %}
-<div class="flex-1 p-8">
-    <div class="flex justify-between items-center mb-8">
-        <h2 class="text-2xl font-bold mb-6">User Profile</h2>
-        <div class="flex items-center space-x-4">
-            <div class="flex items-center space-x-2">
-                <span>[[ user['username'] ]] | [[ user['role'] ]]</span>
-                <a href="[[ url_for('auth_admin.logout') ]]" class="text-blue-500 hover:text-blue-700">Logout</a>
+<div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6">Profile</h1>
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+                Username
+            </label>
+            <div class="flex items-center">
+                <span id="usernameText" class="text-gray-700">[[ user.username ]]</span>
+                <input id="usernameInput" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline hidden" type="text" value="[[ user.username ]]">
+                <button id="editUsername" class="ml-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+                    Edit
+                </button>
             </div>
         </div>
-    </div>
-
-    <div class="bg-white rounded-lg shadow p-6 mb-8">
-        <table class="w-full">
-            <tbody>
-                <tr class="border-t">
-                    <td class="py-2 font-semibold">Username:</td>
-                    <td class="py-2">[[ user['username'] ]]</td>
-                </tr>
-                <tr class="border-t">
-                    <td class="py-2 font-semibold">Role:</td>
-                    <td class="py-2">[[ user['role'] ]]</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                Password
+            </label>
+            <div class="flex items-center">
+                <span id="passwordText" class="text-gray-700">••••••••</span>
+                <input id="passwordInput" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline hidden" type="password" placeholder="Enter new password">
+                <button id="editPassword" class="ml-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline">
+                    Edit
+                </button>
+            </div>
+        </div>
+        <div class="flex items-center justify-between">
+            <button id="updateProfile" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline hidden" type="button">
+                Save Changes
+            </button>
+        </div>
     </div>
 </div>
+
+<script src="[[ url_for('static', filename='js/profile.js') ]]"></script>
 {% endblock %}

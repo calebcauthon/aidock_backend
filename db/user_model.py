@@ -103,6 +103,14 @@ class UserModel:
         conn.close()
         return True
 
+    
+    @staticmethod
+    def update_username(user_id, new_username):
+        conn = create_connection()
+        execute_sql(conn, "UPDATE users SET username = ? WHERE id = ?", (new_username, user_id))
+        conn.close()
+        return True
+
     @staticmethod
     def update_password(user_id, new_password):
         conn = create_connection()
