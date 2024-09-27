@@ -103,6 +103,18 @@ def create_table(conn):
         conn.commit()
         print("Files table possibly created")
 
+        # Create organization_websites table
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS organization_websites (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                organization_id INTEGER NOT NULL,
+                url TEXT NOT NULL,
+                FOREIGN KEY (organization_id) REFERENCES organizations (id)
+            )
+        """)
+        conn.commit()
+        print("Organization websites table possibly created")
+
         cur.close()
     except (sqlite3.Error, psycopg2.Error) as e:
         print(f"Database error: {e}")
