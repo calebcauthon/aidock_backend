@@ -1,45 +1,29 @@
 from flask import Blueprint, request, redirect, url_for, render_template, flash, session
+import flask
 from werkzeug.security import check_password_hash
 from routes_auth_helpers import set_librarian_session
 from db.user_model import UserModel
 import uuid
+from controllers.login import login_controller
+from controllers.logout import logout_controller
 
 auth_admin = Blueprint('auth_admin', __name__)
 
 @auth_admin.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        
-        user = UserModel.get_user_by_username(username)
-
-        if not user:
-            flash('Invalid username or password', 'error')
-            return redirect(url_for('auth_admin.login'))
-        
-        password_hash = user['password_hash']
-        if user and check_password_hash(password_hash, password):
-            login_token = str(uuid.uuid4())
-            UserModel.update_login_token(user['id'], login_token)
-
-            set_librarian_session(user)
-
-            flash('Logged in successfully.', 'success')
-            if session['role'] == 'platform_admin':
-                return redirect(url_for('platform_admin_pages.prompt_history'))
-            elif session['role'] == 'librarian':
-                return redirect(url_for('librarian.librarian_home'))
-            else:
-                return redirect(url_for('profile.profile'))
-        else:
-            flash(f'Invalid username or password, username: {username}, password: [{password}]', 'error')
-    
-    return render_template('login.html')
+    return login_controller({
+        'flask': flask,
+        'UserModel': UserModel,
+        'check_password_hash': check_password_hash,
+        'uuid': uuid,
+        'set_librarian_session': set_librarian_session,
+        'session': session
+    })
 
 @auth_admin.route('/logout')
 def logout():
-    UserModel.clear_login_token(session.get('user_id'))
-    session.clear()
-    flash('Logged out successfully.', 'success')
-    return redirect(url_for('auth_admin.login'))
+    return logout_controller({
+        'flask': flask,
+        'UserModel': UserModel,
+        'session': session
+    })
