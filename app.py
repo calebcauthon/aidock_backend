@@ -13,9 +13,9 @@ from routes_chat_prompt_for_dock import chat_prompt_routes
 from routes_files import files_routes
 from routes_librarian_users import librarian_users_routes
 from routes_platform_admin_pages import platform_admin_pages  # Add this import
-from routes_auth_for_admin_pages import auth_admin
 from routes_profile import profile_routes
 from db.user_model import UserModel
+from routes import register_routes
 
 app = Flask(__name__, static_folder='static')
 app.template_folder = 'templates'
@@ -55,6 +55,7 @@ if conn is not None:
 else:
     print("Error! Cannot create the database connection.")
 
+register_routes(app)
 app.register_blueprint(context_docs, url_prefix='/context_docs')
 app.register_blueprint(prompt_routes)
 app.register_blueprint(user_routes, url_prefix='/users')
@@ -65,7 +66,6 @@ app.register_blueprint(chat_prompt_routes)
 app.register_blueprint(librarian_users_routes)
 app.register_blueprint(platform_admin_pages)
 app.register_blueprint(auth_dock)
-app.register_blueprint(auth_admin)
 app.register_blueprint(profile_routes)
 
 app.secret_key = os.environ.get("SECRET_KEY", "your_fallback_secret_key")
