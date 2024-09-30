@@ -181,3 +181,34 @@ class OrganizationModel:
         execute_sql(conn, 'DELETE FROM user_websites WHERE user_id = ? AND website_url = ?', (user_id, website_url))
         conn.close()
         return True
+
+    def get_organization_websites(self, org_id):
+        conn = create_connection()
+        query = "SELECT id, url FROM organization_websites WHERE organization_id = ?"
+        result = execute_sql(conn, query, (org_id,))
+        conn.close()
+        return [{'id': row[0], 'url': row[1]} for row in result]
+
+    def add_organization_website(self, org_id, website_url):
+        conn = create_connection()
+        query = "INSERT INTO organization_websites (organization_id, url) VALUES (?, ?)"
+        try:
+            execute_sql(conn, query, (org_id, website_url))
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error adding organization website: {e}")
+            conn.close()
+            return False
+
+    def remove_organization_website(self, org_id, website_url):
+        conn = create_connection()
+        query = "DELETE FROM organization_websites WHERE organization_id = ? AND url = ?"
+        try:
+            execute_sql(conn, query, (org_id, website_url))
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error removing organization website: {e}")
+            conn.close()
+            return False

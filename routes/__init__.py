@@ -12,6 +12,7 @@ from .dock.verify import verify_website
 from .user.files_api import files_api
 from .user.files_page import files_page
 from .user.websites import websites_bp
+from .librarian.organization_websites import librarian_websites_bp
 
 def register_routes(app):
     app.register_blueprint(auth)
@@ -29,3 +30,4 @@ def register_routes(app):
     app.register_blueprint(files_api)
     app.register_blueprint(files_page)
     app.register_blueprint(websites_bp)
+    app.register_blueprint(librarian_websites_bp)
