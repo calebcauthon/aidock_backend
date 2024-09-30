@@ -6,4 +6,4 @@ def logout_controller(dependencies):
     UserModel.clear_login_token(session.get('user_id'))
     session.clear()
     flask.flash('Logged out successfully.', 'success')
-    return flask.redirect(flask.url_for('auth_admin.login'))
+    return flask.redirect(flask.url_for('auth.login'))

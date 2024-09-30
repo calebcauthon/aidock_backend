@@ -36,15 +36,6 @@ def create_table(conn):
 
     try:
         cur = conn.cursor()
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS context_docs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                url TEXT NOT NULL,
-                document_name TEXT NOT NULL,
-                document_text TEXT NOT NULL,
-                organization_id INTEGER NOT NULL
-            )
-        """)
         
         # Create prompt_history table
         cur.execute("""
@@ -59,7 +50,7 @@ def create_table(conn):
         """)
 
         conn.commit()
-        print(f"Prompt history and context docs table possibly created")
+        print(f"Prompt history table possibly created")
         
         # Create users table
         cur.execute("""

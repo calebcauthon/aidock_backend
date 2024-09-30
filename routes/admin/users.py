@@ -3,7 +3,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import uuid
 from db.user_model import UserModel
 from db.init_db import create_connection, execute_sql
-from routes_auth_helpers import platform_admin_required
+from ..shared.auth import platform_admin_required
 from db.organization_model import OrganizationModel  # Add this import at the top
 
 user_routes = Blueprint('user_routes', __name__)

@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for
 from db.init_db import create_connection, execute_sql
-from routes_auth_helpers import platform_admin_required
+from ..shared.auth import platform_admin_required
+from db.organization_model import OrganizationModel
+
 
 organization_routes = Blueprint('organization_routes', __name__)
 
@@ -74,3 +76,53 @@ def view_organization(org_id):
             return render_template('superuser_ui/view_organization.html', organization=organization[0], users=users)
     conn.close()
     return jsonify({"error": "Organization not found"}), 404
+
+
+platform_admin_pages = Blueprint('platform_admin_pages', __name__)
+@platform_admin_pages.route('/api/organization/<int:org_id>/websites', methods=['GET'])
+@platform_admin_required
+def get_organization_websites(org_id):
+    try:
+        websites = OrganizationModel.get_organization_websites(org_id)
+        return jsonify(websites)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@platform_admin_pages.route('/api/organization/<int:org_id>/websites', methods=['POST'])
+@platform_admin_required
+def add_organization_website(org_id):
+    try:
+        data = request.json
+        url = data.get('url')
+        if not url:
+            return jsonify({"success": False, "message": "URL is required"}), 400
+        
+        OrganizationModel.add_organization_website(org_id, url)
+        return jsonify({"success": True, "message": "Website added successfully"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@platform_admin_pages.route('/api/organization/<int:org_id>/websites/<int:website_id>', methods=['DELETE'])
+@platform_admin_required
+def remove_organization_website(org_id, website_id):
+    try:
+        OrganizationModel.remove_organization_website(org_id, website_id)
+        return jsonify({"success": True, "message": "Website removed successfully"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@platform_admin_pages.route('/api/websites', methods=['GET'])
+def check_website():
+    current_url = request.args.get('url')
+    org_id = request.args.get('organization_id')
+    if not current_url:
+        return jsonify({"error": "URL parameter is required"}), 400
+
+    try:
+        organization_id = OrganizationModel.check_website(current_url, org_id)
+        if organization_id:
+            return jsonify({"is_organization_website": True, "organization_id": organization_id})
+        else:
+            return jsonify({"is_organization_website": False})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

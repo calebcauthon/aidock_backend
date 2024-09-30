@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
-from routes_auth_helpers import librarian_required
+from routes.shared.auth import librarian_required
 from db.user_model import UserModel
 from db.organization_model import OrganizationModel
 

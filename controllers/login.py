@@ -18,7 +18,7 @@ def login_controller(dependencies):
 
         if not user:
             flash('Invalid username or password', 'error')
-            return redirect(url_for('auth_admin.login'))
+            return redirect(url_for('auth.login'))
         
         password_hash = user['password_hash']
         if user and check_password_hash(password_hash, password):
