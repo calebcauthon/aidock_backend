@@ -119,6 +119,31 @@ def create_table(conn):
         conn.commit()
         print("User websites table possibly created")
 
+        # Create organization_settings table
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS organization_settings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                organization_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                value TEXT,
+                FOREIGN KEY (organization_id) REFERENCES organizations (id),
+                UNIQUE (organization_id, name)
+            )
+        """)
+        conn.commit()
+        print("Organization settings table possibly created")
+
+        # Create default_settings table
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS default_settings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE,
+                default_value TEXT
+            )
+        """)
+        conn.commit()
+        print("Default settings table possibly created")
+
         cur.close()
     except (sqlite3.Error, psycopg2.Error) as e:
         print(f"Database error: {e}")

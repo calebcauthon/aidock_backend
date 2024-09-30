@@ -17,6 +17,7 @@
                     <li class="py-2 px-4 {% if request.path == '/librarian/files' %}bg-gray-700{% endif %} rounded"><a href="[[ url_for('librarian.librarian_files') ]]">Files</a></li>
                     <li class="py-2 px-4 {% if request.path == '/librarian/users' %}bg-gray-700{% endif %} rounded"><a href="[[ url_for('librarian_users.librarian_users') ]]">Users</a></li>
                     <li class="py-2 px-4 {% if request.path == '/librarian/websites' %}bg-gray-700{% endif %} rounded"><a href="[[ url_for('librarian_websites.organization_websites_page') ]]">Websites</a></li>
+                    <li class="py-2 px-4 {% if request.path == '/librarian/settings' %}bg-gray-700{% endif %} rounded"><a href="[[ url_for('librarian_settings.settings_page') ]]">Settings</a></li>
                     <li class="py-2 px-4 {% if request.path == '/profile' %}bg-gray-700{% endif %} rounded"><a href="[[ url_for('profile.profile') ]]">Profile</a></li>
                 </ul>
             </nav>

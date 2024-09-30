@@ -1,0 +1,78 @@
+{% extends "base_librarian.html" %}
+
+{% block content %}
+<div class="flex-1 p-8" ng-app="settingsApp" ng-controller="SettingsController">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-bold mb-6">Settings | [[librarian['organization_name']]]</h2>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <span>[[librarian['username']]] | [[librarian['organization_name']]]</span>
+                <a href="[[ url_for('auth.logout') ]]" class="text-blue-500 hover:text-blue-700">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <table class="w-full">
+            <thead>
+                <tr class="text-left text-gray-500">
+                    <th class="pb-2">Name</th>
+                    <th class="pb-2">Value</th>
+                    <th class="pb-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="setting in settings" class="border-t">
+                    <td class="py-2">{[{ setting.name }]}</td>
+                    <td class="py-2">
+                        <span ng-hide="setting.editing">{[{ setting.value }]}</span>
+                        <input ng-show="setting.editing" type="text" ng-model="setting.value" class="border rounded px-2 py-1">
+                    </td>
+                    <td class="py-2">
+                        <button ng-hide="setting.editing" ng-click="editSetting(setting)" class="text-blue-500 hover:text-blue-600 mr-2">Edit</button>
+                        <button ng-show="setting.editing" ng-click="saveSetting(setting)" class="text-green-500 hover:text-green-600 mr-2">Save</button>
+                        <button ng-show="setting.editing" ng-click="cancelEdit(setting)" class="text-red-500 hover:text-red-600">Cancel</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+<script>
+    angular.module('settingsApp', [])
+        .config(function($interpolateProvider) {
+            $interpolateProvider.startSymbol('{[{');
+            $interpolateProvider.endSymbol('}]}');
+        })
+        .controller('SettingsController', function($scope, $http) {
+            $scope.settings = [[ settings | tojson | safe ]];
+
+            $scope.editSetting = function(setting) {
+                setting.editing = true;
+                setting.originalValue = setting.value;
+            };
+
+            $scope.saveSetting = function(setting) {
+                $http.post('/librarian/api/settings', { name: setting.name, value: setting.value })
+                    .then(function(response) {
+                        if (response.data.success) {
+                            setting.editing = false;
+                        } else {
+                            alert('Failed to update setting: ' + response.data.message);
+                        }
+                    })
+                    .catch(function(error) {
+                        alert('An error occurred while updating the setting');
+                        console.error(error);
+                    });
+            };
+
+            $scope.cancelEdit = function(setting) {
+                setting.editing = false;
+                setting.value = setting.originalValue;
+            };
+        });
+</script>
+{% endblock %}

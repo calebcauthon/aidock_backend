@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, render_template, redirect, url_fo
 from db.init_db import create_connection, execute_sql
 from ..shared.auth import platform_admin_required
 from db.organization_model import OrganizationModel
+from db.settings_model import SettingsModel
 
 
 organization_routes = Blueprint('organization_routes', __name__)
@@ -31,6 +32,9 @@ def create_organization():
             result = execute_sql(conn, "SELECT * FROM organizations WHERE name = ?", (name,))
             org_id = result[0][0]
             conn.close()
+
+            # Create organization settings
+            SettingsModel.create_organization_settings(org_id)
 
             return redirect(url_for('organization_routes.list_organizations'))
     return render_template('organizations/create.html')
