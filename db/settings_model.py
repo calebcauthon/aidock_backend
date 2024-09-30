@@ -4,9 +4,14 @@ class SettingsModel:
     @staticmethod
     def get_organization_settings(organization_id):
         conn = create_connection()
-        settings = execute_sql(conn, "SELECT name, value FROM organization_settings WHERE organization_id = ?", (organization_id,))
+        settings = execute_sql(conn, """
+            SELECT os.name, os.value, ds.description 
+            FROM organization_settings os
+            LEFT JOIN default_settings ds ON os.name = ds.name
+            WHERE os.organization_id = ?
+        """, (organization_id,))
         conn.close()
-        return [{"name": setting[0], "value": setting[1]} for setting in settings]
+        return [{"name": setting[0], "value": setting[1], "description": setting[2]} for setting in settings]
 
     @staticmethod
     def update_organization_setting(organization_id, name, value):
@@ -18,14 +23,21 @@ class SettingsModel:
     @staticmethod
     def get_default_settings():
         conn = create_connection()
-        settings = execute_sql(conn, "SELECT name, default_value FROM default_settings")
+        settings = execute_sql(conn, "SELECT name, default_value, description FROM default_settings")
         conn.close()
-        return [{"name": setting[0], "default_value": setting[1]} for setting in settings]
+        return [{"name": setting[0], "default_value": setting[1], "description": setting[2]} for setting in settings]
 
     @staticmethod
-    def add_default_setting(name, default_value):
+    def add_default_setting(name, default_value, description):
         conn = create_connection()
-        execute_sql(conn, "INSERT INTO default_settings (name, default_value) VALUES (?, ?)", (name, default_value))
+        execute_sql(conn, "INSERT INTO default_settings (name, default_value, description) VALUES (?, ?, ?)", (name, default_value, description))
+        conn.close()
+        return True
+
+    @staticmethod
+    def update_default_setting(name, default_value, description):
+        conn = create_connection()
+        execute_sql(conn, "UPDATE default_settings SET default_value = ?, description = ? WHERE name = ?", (default_value, description, name))
         conn.close()
         return True
 

@@ -138,7 +138,8 @@ def create_table(conn):
             CREATE TABLE IF NOT EXISTS default_settings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL UNIQUE,
-                default_value TEXT
+                default_value TEXT,
+                description TEXT
             )
         """)
         conn.commit()
