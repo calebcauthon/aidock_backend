@@ -1,8 +1,10 @@
 {% extends "base_user.html" %}
 
-{% block content %}
+{% block title %}
     <h1 class="text-3xl font-bold mb-6">Files | [[ organization.name ]]</h1>
+{% endblock %}
 
+{% block content %}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}

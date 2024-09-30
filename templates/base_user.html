@@ -22,10 +22,15 @@
         <!-- Main content -->
 
         <div class="container mx-auto p-6">
-            <!-- Add username and logout link in the upper right corner -->
-            <div class="absolute top-4 right-4 flex items-center">
-                <span class="text-gray-700 mr-4">Welcome, [[ user.username ]]</span>
-                <a href="[[ url_for('auth.logout') ]]" class="text-blue-500 hover:text-blue-700">Logout</a>
+            
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center">
+                    {% block title %}{% endblock %}
+                </div>
+                <div class="flex items-center">
+                    <span class="text-gray-700 mr-4">Welcome, [[ user.username ]]</span>
+                    <a href="[[ url_for('auth.logout') ]]" class="text-blue-500 hover:text-blue-700">Logout</a>
+                </div>
             </div>
             {% block content %}{% endblock %}
         </div>
