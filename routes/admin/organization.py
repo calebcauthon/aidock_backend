@@ -92,7 +92,6 @@ platform_admin_pages = Blueprint('platform_admin_pages', __name__)
 @platform_admin_pages.route('/api/organization/<int:org_id>/websites', methods=['GET'])
 @platform_admin_required
 def get_organization_websites(org_id):
-    print(f"org_id: {org_id}")
     try:
         websites = OrganizationModel.get_organization_websites(org_id)
         return jsonify(websites)

@@ -56,11 +56,18 @@ class SettingsModel:
         conn = create_connection()
         if conn is not None:
             try:
+                # First, delete the existing setting
                 execute_sql(conn, """
-                    UPDATE organization_settings
-                    SET value = ?
+                    DELETE FROM organization_settings
                     WHERE organization_id = ? AND name = ?
-                """, (setting_value, org_id, setting_name))
+                """, (org_id, setting_name))
+                
+                # Then, insert the new setting
+                execute_sql(conn, """
+                    INSERT INTO organization_settings (organization_id, name, value)
+                    VALUES (?, ?, ?)
+                """, (org_id, setting_name, setting_value))
+                
                 conn.commit()
             except Exception as e:
                 conn.rollback()
