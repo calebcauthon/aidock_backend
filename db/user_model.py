@@ -47,6 +47,8 @@ class UserModel:
         conn = create_connection()
         user = execute_sql(conn, "SELECT id, username, email, role, organization_id, login_token FROM users WHERE id = ?", (user_id,))
         user = {"id": user[0][0], "username": user[0][1], "email": user[0][2], "role": user[0][3], "organization_id": user[0][4], "login_token": user[0][5]} if user else None
+
+        user['organization_name'] = execute_sql(conn, "SELECT name FROM organizations WHERE id = ?", (user['organization_id'],))[0][0]
         conn.close()
 
         return user if user else None

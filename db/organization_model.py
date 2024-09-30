@@ -2,6 +2,20 @@ from db.init_db import create_connection, execute_sql
 
 class OrganizationModel:
     @staticmethod
+    def get_organization_by_name(name):
+        conn = create_connection()
+        org = execute_sql(conn, "SELECT id, name, description FROM organizations WHERE name = ?", (name,))
+        conn.close()
+
+        if org:
+            return {
+                "id": org[0][0],
+                "name": org[0][1],
+                "description": org[0][2]
+            }
+        return None
+
+    @staticmethod
     def get_organization(org_id):
         conn = create_connection()
         org = execute_sql(conn, "SELECT id, name, description FROM organizations WHERE id = ?", (org_id,))
@@ -91,13 +105,33 @@ class OrganizationModel:
         return True
 
     @staticmethod
-    def check_website(current_url, org_id):
+    def check_website(current_url, org_id, user_id):
         conn = create_connection()
-        query = "SELECT id FROM organization_websites WHERE ? LIKE '%' || url || '%' AND organization_id = ?"
-        params = (current_url, org_id)
-        result = execute_sql(conn, query, params)
-        conn.close()
-        return result[0][0] if result else None
+        
+        # Step 1: Check if it's an organization website
+        org_query = "SELECT id FROM organization_websites WHERE ? LIKE '%' || url || '%' AND organization_id = ?"
+        org_result = execute_sql(conn, org_query, (current_url, org_id))
+        
+        if org_result:
+            # Step 2: Check for user override
+            user_query = "SELECT is_active FROM user_websites WHERE ? LIKE '%' || website_url || '%' AND user_id = ?"
+            user_result = execute_sql(conn, user_query, (current_url, user_id))
+            
+            if user_result:
+                # User override exists, return based on is_active
+                conn.close()
+                return org_id if user_result[0][0] else None
+            else:
+                # No user override, return org_id
+                conn.close()
+                return org_id
+        else:
+            # Step 3: Check user_websites for non-org sites
+            user_query = "SELECT is_active FROM user_websites WHERE ? LIKE '%' || website_url || '%' AND user_id = ?"
+            user_result = execute_sql(conn, user_query, (current_url, user_id))
+            
+            conn.close()
+            return org_id if user_result and user_result[0][0] else None
 
     @staticmethod
     def get_all_websites_for_organization(organization_id):

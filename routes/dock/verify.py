@@ -7,11 +7,12 @@ verify_website = Blueprint('verify_website', __name__)
 def check_website():
     current_url = request.args.get('url')
     org_id = request.args.get('organization_id')
+    user_id = request.args.get('user_id')
     if not current_url:
         return jsonify({"error": "URL parameter is required"}), 400
 
     try:
-        organization_id = OrganizationModel.check_website(current_url, org_id)
+        organization_id = OrganizationModel.check_website(current_url, org_id, user_id)
         if organization_id:
             return jsonify({"is_organization_website": True, "organization_id": organization_id})
         else:

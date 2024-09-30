@@ -29,7 +29,7 @@
                     {% block title %}{% endblock %}
                 </div>
                 <div class="flex items-center">
-                    <span class="text-gray-700 mr-4">Welcome, [[ user.username ]]</span>
+                    <span class="text-gray-700 mr-4">Welcome, [[ user.username ]] | [[ user.organization_name ]]</span>
                     <a href="[[ url_for('auth.logout') ]]" class="text-blue-500 hover:text-blue-700">Logout</a>
                 </div>
             </div>
