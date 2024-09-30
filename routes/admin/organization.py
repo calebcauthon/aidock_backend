@@ -144,3 +144,25 @@ def refresh_organization_settings(org_id):
         return jsonify({"success": True, "message": "Settings refreshed successfully"})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
+@organization_routes.route('/api/organization/<int:org_id>/settings', methods=['POST'])
+@platform_admin_required
+def update_organization_setting(org_id):
+    conn = create_connection()
+    if conn is not None:
+        data = request.json
+        setting_name = data.get('name')
+        setting_value = data.get('value')
+
+        if not setting_name or setting_value is None:
+            conn.close()
+            return jsonify({'success': False, 'message': 'Invalid data'}), 400
+
+        try:
+            SettingsModel.update_organization_setting(org_id, setting_name, setting_value)
+            conn.close()
+            return jsonify({'success': True, 'message': 'Setting updated successfully'})
+        except Exception as e:
+            conn.close()
+            return jsonify({'success': False, 'message': str(e)}), 500
+    return jsonify({"error": "Unable to connect to the database"}), 500

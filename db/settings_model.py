@@ -50,3 +50,22 @@ class SettingsModel:
                         (organization_id, setting['name'], setting['default_value']))
         conn.close()
         return True
+
+    @staticmethod
+    def update_organization_setting(org_id, setting_name, setting_value):
+        conn = create_connection()
+        if conn is not None:
+            try:
+                execute_sql(conn, """
+                    UPDATE organization_settings
+                    SET value = ?
+                    WHERE organization_id = ? AND name = ?
+                """, (setting_value, org_id, setting_name))
+                conn.commit()
+            except Exception as e:
+                conn.rollback()
+                raise e
+            finally:
+                conn.close()
+        else:
+            raise Exception("Unable to connect to the database")

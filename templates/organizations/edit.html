@@ -47,13 +47,22 @@
                     <th class="text-left p-2">Setting</th>
                     <th class="text-left p-2">Value</th>
                     <th class="text-left p-2">Description</th>
+                    <th class="text-left p-2">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <tr ng-repeat="setting in settings" class="border-b">
                     <td class="p-2">{{ setting.name }}</td>
-                    <td class="p-2">{{ setting.value }}</td>
+                    <td class="p-2">
+                        <span ng-hide="setting.editing">{{ setting.value }}</span>
+                        <input ng-show="setting.editing" type="text" ng-model="setting.value" class="border rounded px-2 py-1">
+                    </td>
                     <td class="p-2">{{ setting.description }}</td>
+                    <td class="p-2">
+                        <button ng-hide="setting.editing" ng-click="editSetting(setting)" class="text-blue-500 hover:text-blue-600 mr-2">Edit</button>
+                        <button ng-show="setting.editing" ng-click="saveSetting(setting)" class="text-green-500 hover:text-green-600 mr-2">Save</button>
+                        <button ng-show="setting.editing" ng-click="cancelEdit(setting)" class="text-red-500 hover:text-red-600">Cancel</button>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -124,6 +133,31 @@
                             alert('Failed to refresh settings: ' + response.data.message);
                         }
                     });
+            };
+
+            $scope.editSetting = function(setting) {
+                setting.editing = true;
+                setting.originalValue = setting.value;
+            };
+
+            $scope.saveSetting = function(setting) {
+                $http.post(`[[ url_for("organization_routes.update_organization_setting", org_id=organization[0]) ]]`, { name: setting.name, value: setting.value })
+                    .then(function(response) {
+                        if (response.data.success) {
+                            setting.editing = false;
+                        } else {
+                            alert('Failed to update setting: ' + response.data.message);
+                        }
+                    })
+                    .catch(function(error) {
+                        alert('An error occurred while updating the setting');
+                        console.error(error);
+                    });
+            };
+
+            $scope.cancelEdit = function(setting) {
+                setting.editing = false;
+                setting.value = setting.originalValue;
             };
 
             $scope.loadWebsites();
