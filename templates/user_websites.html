@@ -50,6 +50,11 @@
             </div>
         </li>
         {% endfor %}
+        {% if not user_websites %}
+        <li>
+            <em class="text-gray-400">Websites you add here will have KTDock enabled</em>
+        </li>
+        {% endif %}
     </ul>
 </div>
 
