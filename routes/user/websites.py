@@ -16,7 +16,9 @@ def user_websites(user):
             website['is_active'] = False
         else:
             website['is_active'] = True
-    return render_template('user_websites.html', websites=websites, user=user, user_websites=user_websites)
+    
+    user_overrides = [uw for uw in user_websites if not any(w['url'] == uw[1] for w in websites)]
+    return render_template('user_websites.html', websites=websites, user=user, user_websites=user_overrides)
 
 @websites_bp.route('/api/user/websites/toggle', methods=['POST'])
 @authenticate_user_with_token
