@@ -8,6 +8,7 @@ from .shared.profile import profile_routes
 from .admin.organization import organization_routes, platform_admin_pages
 from .admin.history import history
 from .admin.users import user_routes
+from .dock.verify import verify_website
 
 def register_routes(app):
     app.register_blueprint(auth)
@@ -21,3 +22,4 @@ def register_routes(app):
     app.register_blueprint(prompt_routes)
     app.register_blueprint(history)
     app.register_blueprint(user_routes, url_prefix='/users')
+    app.register_blueprint(verify_website)

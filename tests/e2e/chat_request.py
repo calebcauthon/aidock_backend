@@ -1,7 +1,18 @@
 import sys
+import os
+
+# Add the project root directory to the Python path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.append(project_root)
+
 import subprocess
 import json
-from app import create_connection
+from db.init_db import create_connection
+
+import sys
+import subprocess
+import json
+from db.init_db import create_connection
 
 def get_login_token(username):
     conn = create_connection()

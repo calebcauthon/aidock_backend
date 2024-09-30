@@ -77,7 +77,6 @@ def view_organization(org_id):
     conn.close()
     return jsonify({"error": "Organization not found"}), 404
 
-
 platform_admin_pages = Blueprint('platform_admin_pages', __name__)
 @platform_admin_pages.route('/api/organization/<int:org_id>/websites', methods=['GET'])
 @platform_admin_required
@@ -110,19 +109,3 @@ def remove_organization_website(org_id, website_id):
         return jsonify({"success": True, "message": "Website removed successfully"})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
-@platform_admin_pages.route('/api/websites', methods=['GET'])
-def check_website():
-    current_url = request.args.get('url')
-    org_id = request.args.get('organization_id')
-    if not current_url:
-        return jsonify({"error": "URL parameter is required"}), 400
-
-    try:
-        organization_id = OrganizationModel.check_website(current_url, org_id)
-        if organization_id:
-            return jsonify({"is_organization_website": True, "organization_id": organization_id})
-        else:
-            return jsonify({"is_organization_website": False})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
