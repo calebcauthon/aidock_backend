@@ -1,0 +1,163 @@
+{% extends "base_user.html" %}
+
+{% block title %}
+<h1 class="text-2xl font-bold">Websites</h1>
+{% endblock %}
+
+{% block content %}
+<p class="text-sm text-gray-500 mb-4">
+    Note: The KTDock Chrome extension will only function on websites where it has been enabled through these KTDock settings.
+</p>
+
+<div class="bg-white shadow-md rounded-lg p-6 mb-6">
+    <h2 class="text-xl font-semibold mb-4">Enable KTDock for a Website</h2>
+    <form id="addWebsiteForm" class="flex items-center">
+        <input type="text" id="newWebsiteUrl" placeholder="Enter Website URL" class="flex-grow mr-2 p-2 border rounded" required>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add Website</button>
+    </form>
+</div>
+
+<div class="bg-white shadow-md rounded-lg p-6">
+    <h2 class="text-xl font-semibold mb-4">KTDock-enabled Websites (Set by Librarian)</h2>
+    <p class="text-sm text-gray-500 mb-2">If the URL contains:</p>
+    <ul id="websiteList" class="space-y-4">
+        {% for website in websites %}
+        <li class="flex items-center justify-between">
+            <span class="text-lg">[[ website['url'] ]]</span>
+            <div class="flex items-center">
+                <label class="inline-flex items-center cursor-pointer mr-4">
+                    <input type="checkbox" class="hidden website-toggle" data-website-url="[[ website['url'] ]]" {% if website['is_active'] %}checked{% endif %}>
+                    <div class="relative">
+                        <div class="w-10 h-6 bg-gray-300 rounded-full shadow-inner"></div>
+                        <div class="toggle-dot absolute w-4 h-4 rounded-full shadow inset-y-0 left-0 transition-transform duration-300 ease-in-out {% if website['is_active'] %}translate-x-full bg-green-500{% else %}bg-red-500{% endif %}"></div>
+                    </div>
+                    <span class="ml-2 text-sm font-medium {% if website['is_active'] %}text-green-500{% else %}text-red-500{% endif %}">
+                        {% if website['is_active'] %}ON{% else %}OFF{% endif %}
+                    </span>
+                </label>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="bg-white shadow-md rounded-lg p-6 mt-6">
+    <h2 class="text-xl font-semibold mb-4">Your KTDock-enabled Websites</h2>
+    <ul id="userWebsiteList" class="space-y-4">
+        {% for website in user_websites %}
+        <li class="flex items-center justify-between">
+            <span class="text-lg">[[ website[1] ]]</span>
+            <div class="flex items-center">
+                <span class="mr-4">
+                    Status: [[ 'Active' if website[2] else 'Inactive' ]]
+                </span>
+                <button class="remove-user-website text-red-500 hover:text-red-700" data-website-url="[[ website[1] ]]">Remove</button>
+            </div>
+        </li>
+        {% endfor %}
+        {% if not user_websites %}
+        <li>
+            <em class="text-gray-400">Websites you add here will have KTDock enabled</em>
+        </li>
+        {% endif %}
+    </ul>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggles = document.querySelectorAll('.website-toggle');
+    toggles.forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            const websiteUrl = this.dataset.websiteUrl;
+            const isActive = this.checked;
+            fetch('/api/user/websites/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Login-Token': '[[ user['login_token'] ]]'
+                },
+                body: JSON.stringify({ website_url: websiteUrl, is_active: isActive }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const dot = this.parentElement.querySelector('.toggle-dot');
+                    const statusText = this.parentElement.querySelector('span');
+                    dot.classList.toggle('translate-x-full');
+                    dot.classList.toggle('bg-green-500');
+                    dot.classList.toggle('bg-red-500');
+                    statusText.classList.toggle('text-green-500');
+                    statusText.classList.toggle('text-red-500');
+                    statusText.textContent = isActive ? 'ON' : 'OFF';
+                } else {
+                    console.error('Failed to update website status');
+                    this.checked = !isActive;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                this.checked = !isActive;
+            });
+        });
+    });
+
+    // Add new website
+    const addWebsiteForm = document.getElementById('addWebsiteForm');
+    addWebsiteForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const websiteUrl = document.getElementById('newWebsiteUrl').value;
+        fetch('/api/user/websites/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Login-Token': '[[ user['login_token'] ]]'
+            },
+            body: JSON.stringify({ website_url: websiteUrl }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload(); // Reload the page to show the new website
+            } else {
+                alert('Failed to add website: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while adding the website');
+        });
+    });
+
+    // Remove website
+    const removeButtons = document.querySelectorAll('.remove-user-website');
+    removeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const websiteUrl = this.dataset.websiteUrl;
+            if (confirm('Are you sure you want to remove this website?')) {
+                fetch('/api/user/websites/remove', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Login-Token': '[[ user['login_token'] ]]'
+                    },
+                    body: JSON.stringify({ website_url: websiteUrl }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload(); // Reload the page to update the website list
+                    } else {
+                        alert('Failed to remove website: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while removing the website');
+                });
+            }
+        });
+    });
+
+});
+</script>
+{% endblock %}

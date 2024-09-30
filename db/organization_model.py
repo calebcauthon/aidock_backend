@@ -2,6 +2,20 @@ from db.init_db import create_connection, execute_sql
 
 class OrganizationModel:
     @staticmethod
+    def get_organization_by_name(name):
+        conn = create_connection()
+        org = execute_sql(conn, "SELECT id, name, description FROM organizations WHERE name = ?", (name,))
+        conn.close()
+
+        if org:
+            return {
+                "id": org[0][0],
+                "name": org[0][1],
+                "description": org[0][2]
+            }
+        return None
+
+    @staticmethod
     def get_organization(org_id):
         conn = create_connection()
         org = execute_sql(conn, "SELECT id, name, description FROM organizations WHERE id = ?", (org_id,))
@@ -83,18 +97,132 @@ class OrganizationModel:
             raise e
 
     @staticmethod
-    def remove_organization_website(org_id, website_id):
+    def remove_organization_website(org_id, url):
         conn = create_connection()
-        execute_sql(conn, "DELETE FROM organization_websites WHERE id = ? AND organization_id = ?", 
-                    (website_id, org_id))
+        execute_sql(conn, "DELETE FROM organization_websites WHERE organization_id = ? AND url = ?", 
+                    (org_id, url))
         conn.close()
         return True
 
     @staticmethod
-    def check_website(current_url, org_id):
+    def check_website(current_url, org_id, user_id):
         conn = create_connection()
-        query = "SELECT id FROM organization_websites WHERE ? LIKE '%' || url || '%' AND organization_id = ?"
-        params = (current_url, org_id)
-        result = execute_sql(conn, query, params)
+        
+        # Step 1: Check if it's an organization website
+        org_query = "SELECT id FROM organization_websites WHERE ? LIKE '%' || url || '%' AND organization_id = ?"
+        org_result = execute_sql(conn, org_query, (current_url, org_id))
+        
+        if org_result:
+            # Step 2: Check for user override
+            user_query = "SELECT is_active FROM user_websites WHERE ? LIKE '%' || website_url || '%' AND user_id = ?"
+            user_result = execute_sql(conn, user_query, (current_url, user_id))
+            
+            if user_result:
+                # User override exists, return based on is_active
+                conn.close()
+                return org_id if user_result[0][0] else None
+            else:
+                # No user override, return org_id
+                conn.close()
+                return org_id
+        else:
+            # Step 3: Check user_websites for non-org sites
+            user_query = "SELECT is_active FROM user_websites WHERE ? LIKE '%' || website_url || '%' AND user_id = ?"
+            user_result = execute_sql(conn, user_query, (current_url, user_id))
+            
+            conn.close()
+            return org_id if user_result and user_result[0][0] else None
+
+    @staticmethod
+    def get_all_websites_for_organization(organization_id):
+        conn = create_connection()
+        query = """
+            SELECT ow.id, ow.url, 'organization' as type
+            FROM organization_websites ow
+            WHERE ow.organization_id = ?
+        """
+        websites = execute_sql(conn, query, (organization_id,))
         conn.close()
-        return result[0][0] if result else None
+        return [{'id': row[0], 'url': row[1], 'type': row[2]} for row in websites]
+
+    @staticmethod
+    def get_organization_website_entry(website_id):
+        conn = create_connection()
+        query = "SELECT id, organization_id, url FROM organization_websites WHERE id = ?"
+        try:
+            result = execute_sql(conn, query, (website_id,))
+            conn.close()
+            if result:
+                return {
+                    'id': result[0][0],
+                    'organization_id': result[0][1],
+                    'url': result[0][2]
+                }
+            else:
+                return None
+        except Exception as e:
+            print(f"Error fetching organization website entry: {e}")
+            conn.close()
+            return None
+
+    @staticmethod
+    def get_user_websites(user_id):
+        conn = create_connection()
+        websites = execute_sql(conn, 'SELECT id, website_url, is_active FROM user_websites WHERE user_id = ?', (user_id,))
+        conn.close()
+        return websites
+
+    @staticmethod
+    def toggle_user_website(user_id, website_url, is_active):
+        conn = create_connection()
+        execute_sql(conn, 'DELETE FROM user_websites WHERE user_id = ? AND website_url = ?', (user_id, website_url))
+        execute_sql(conn, 'INSERT INTO user_websites (user_id, website_url, is_active) VALUES (?, ?, ?)', (user_id, website_url, is_active))
+        conn.close()
+        return True
+
+    @staticmethod
+    def add_user_website(user_id, website_url):
+        conn = create_connection()
+        # Check if the user_id/website combination already exists
+        existing_website = execute_sql(conn, 'SELECT id FROM user_websites WHERE user_id = ? AND website_url = ?', (user_id, website_url))
+        
+        if not existing_website:
+            execute_sql(conn, '''\
+                INSERT OR IGNORE INTO user_websites (user_id, website_url)
+                    VALUES (?, ?)
+                ''', (user_id, website_url))
+        conn.close()
+        return True
+
+    @staticmethod
+    def remove_user_website(user_id, website_url):
+        conn = create_connection()
+        execute_sql(conn, 'DELETE FROM user_websites WHERE user_id = ? AND website_url = ?', (user_id, website_url))
+        conn.close()
+        return True
+
+    @staticmethod
+    def add_organization_website(org_id, website_url):
+        conn = create_connection()
+        query = "INSERT INTO organization_websites (organization_id, url) VALUES (?, ?)"
+        try:
+            execute_sql(conn, query, (org_id, website_url))
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error adding organization website: {e}")
+            conn.close()
+            return False
+
+    @staticmethod
+    def remove_organization_website(org_id, website_url):
+        conn = create_connection()
+        query = "DELETE FROM organization_websites WHERE organization_id = ? AND url = ?"
+        try:
+            execute_sql(conn, query, (org_id, website_url))
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error removing organization website: {e}")
+            conn.close()
+            return False

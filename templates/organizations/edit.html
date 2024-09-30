@@ -1,100 +1,166 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Edit Organization</h1>
-    <form action="[[ url_for('organization_routes.edit_organization', org_id=organization[0]) ]]" method="POST">
-        <div class="form-group">
-
-            <label for="name">Name</label>
-            <input type="text" class="form-control" id="name" name="name" value="[[ organization[1] ]]" required>
-        </div>
-        <div class="form-group">
-            <label for="description">Description</label>
-            <textarea class="form-control" id="description" name="description" rows="3">[[ organization[2] ]]</textarea>
-        </div>
-        <button type="submit" class="btn">Update Organization</button>
-    </form>
-
-    <h2>Organization Websites</h2>
-    <div id="websiteList">
-        <!-- Website list will be populated here -->
-    </div>
-    <div class="form-group">
-        <input type="text" id="newWebsite" placeholder="Enter new website URL">
-        <button id="addWebsite" class="btn">Add Website</button>
+<div ng-app="organizationApp" ng-controller="OrganizationController" class="flex-1 p-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl font-bold">Edit Organization</h1>
     </div>
 
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Organization Details</h2>
+        <form ng-submit="updateOrganization()">
+            <div class="mb-4">
+                <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                <input type="text" class="mt-1 block w-full border rounded-md shadow-sm p-2" id="name" ng-model="organization.name" required>
+            </div>
+            <div class="mb-4">
+                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea class="mt-1 block w-full border rounded-md shadow-sm p-2" id="description" ng-model="organization.description" rows="3"></textarea>
+            </div>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Update Organization</button>
+        </form>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Organization Websites</h2>
+        <ul id="websiteList" class="space-y-4 mb-4">
+            <li ng-repeat="website in websites" class="flex items-center justify-between">
+                <span class="text-lg">{{ website.url }}</span>
+                <button ng-click="removeWebsite(website.id)" class="text-red-500 hover:text-red-700">Remove</button>
+            </li>
+            <li ng-if="websites.length === 0">
+                <em class="text-gray-400">No organization websites added yet</em>
+            </li>
+        </ul>
+        <div class="flex items-center">
+            <input type="text" ng-model="newWebsiteUrl" placeholder="Enter new website URL" class="flex-grow mr-2 p-2 border rounded">
+            <button ng-click="addWebsite()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add Website</button>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Organization Settings</h2>
+        <button ng-click="refreshSettings()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mb-4">Refresh from Defaults</button>
+        <table class="w-full">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="text-left p-2">Setting</th>
+                    <th class="text-left p-2">Value</th>
+                    <th class="text-left p-2">Description</th>
+                    <th class="text-left p-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="setting in settings" class="border-b">
+                    <td class="p-2">{{ setting.name }}</td>
+                    <td class="p-2">
+                        <span ng-hide="setting.editing">{{ setting.value }}</span>
+                        <input ng-show="setting.editing" type="text" ng-model="setting.value" class="border rounded px-2 py-1">
+                    </td>
+                    <td class="p-2">{{ setting.description }}</td>
+                    <td class="p-2">
+                        <button ng-hide="setting.editing" ng-click="editSetting(setting)" class="text-blue-500 hover:text-blue-600 mr-2">Edit</button>
+                        <button ng-show="setting.editing" ng-click="saveSetting(setting)" class="text-green-500 hover:text-green-600 mr-2">Save</button>
+                        <button ng-show="setting.editing" ng-click="cancelEdit(setting)" class="text-red-500 hover:text-red-600">Cancel</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
 <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-        const websiteList = document.getElementById('websiteList');
-        const newWebsiteInput = document.getElementById('newWebsite');
-        const addWebsiteButton = document.getElementById('addWebsite');
-        const organizationId = [[ organization[0] ]];
+    angular.module('organizationApp', [])
+        .controller('OrganizationController', function($scope, $http) {
+            $scope.organization = {
+                id: [[ organization[0] ]],
+                name: '[[ organization[1] ]]',
+                description: '[[ organization[2] ]]'
+            };
+            $scope.websites = [];
+            $scope.settings = [[ settings|tojson|safe ]];
+            $scope.newWebsiteUrl = '';
 
-        function loadWebsites() {
-            fetch(`/api/organization/${organizationId}/websites`)
-                .then(response => response.json())
-                .then(websites => {
-                    websiteList.innerHTML = '';
-                    websites.forEach(website => {
-                        const websiteElement = document.createElement('div');
-                        websiteElement.innerHTML = `
-                            ${website.url}
-                            <button class="removeWebsite" data-id="${website.id}">Remove</button>
-                        `;
-                        websiteList.appendChild(websiteElement);
+            $scope.loadWebsites = function() {
+                $http.get(`/api/organization/${$scope.organization.id}/websites`)
+                    .then(function(response) {
+                        $scope.websites = response.data;
                     });
-                    addRemoveListeners();
-                });
-        }
+            };
 
-        function addRemoveListeners() {
-            document.querySelectorAll('.removeWebsite').forEach(button => {
-                button.addEventListener('click', function() {
-                    const websiteId = this.getAttribute('data-id');
-                    removeWebsite(websiteId);
-                });
-            });
-        }
+            $scope.updateOrganization = function() {
+                $http.post('[[ url_for("organization_routes.edit_organization", org_id=organization[0]) ]]', $scope.organization)
+                    .then(function(response) {
+                        alert('Organization updated successfully');
+                    }, function(error) {
+                        alert('Failed to update organization');
+                    });
+            };
 
-        function addWebsite() {
-            const url = newWebsiteInput.value.trim();
-            if (url) {
-                fetch(`/api/organization/${organizationId}/websites`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ url: url }),
-                })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        loadWebsites();
-                        newWebsiteInput.value = '';
-                    } else {
-                        alert('Failed to add website: ' + result.message);
-                    }
-                });
-            }
-        }
-
-        function removeWebsite(websiteId) {
-            fetch(`/api/organization/${organizationId}/websites/${websiteId}`, {
-                method: 'DELETE',
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    loadWebsites();
-                } else {
-                    alert('Failed to remove website: ' + result.message);
+            $scope.addWebsite = function() {
+                if ($scope.newWebsiteUrl) {
+                    $http.post(`/api/organization/${$scope.organization.id}/websites`, { url: $scope.newWebsiteUrl })
+                        .then(function(response) {
+                            if (response.data.success) {
+                                $scope.loadWebsites();
+                                $scope.newWebsiteUrl = '';
+                            } else {
+                                alert('Failed to add website: ' + response.data.message);
+                            }
+                        });
                 }
-            });
-        }
+            };
 
-        addWebsiteButton.addEventListener('click', addWebsite);
-        loadWebsites();
-    });
+            $scope.removeWebsite = function(websiteId) {
+                $http.delete(`/api/organization/${$scope.organization.id}/websites/${websiteId}`)
+                    .then(function(response) {
+                        if (response.data.success) {
+                            $scope.loadWebsites();
+                        } else {
+                            alert('Failed to remove website: ' + response.data.message);
+                        }
+                    });
+            };
+
+            $scope.refreshSettings = function() {
+                $http.post(`/api/organization/${$scope.organization.id}/refresh-settings`)
+                    .then(function(response) {
+                        if (response.data.success) {
+                            alert('Settings refreshed successfully');
+                            location.reload();
+                        } else {
+                            alert('Failed to refresh settings: ' + response.data.message);
+                        }
+                    });
+            };
+
+            $scope.editSetting = function(setting) {
+                setting.editing = true;
+                setting.originalValue = setting.value;
+            };
+
+            $scope.saveSetting = function(setting) {
+                $http.post(`[[ url_for("organization_routes.update_organization_setting", org_id=organization[0]) ]]`, { name: setting.name, value: setting.value })
+                    .then(function(response) {
+                        if (response.data.success) {
+                            setting.editing = false;
+                        } else {
+                            alert('Failed to update setting: ' + response.data.message);
+                        }
+                    })
+                    .catch(function(error) {
+                        alert('An error occurred while updating the setting');
+                        console.error(error);
+                    });
+            };
+
+            $scope.cancelEdit = function(setting) {
+                setting.editing = false;
+                setting.value = setting.originalValue;
+            };
+
+            $scope.loadWebsites();
+        });
 </script>
 {% endblock %}

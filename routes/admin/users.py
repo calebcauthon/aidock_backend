@@ -3,7 +3,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import uuid
 from db.user_model import UserModel
 from db.init_db import create_connection, execute_sql
-from routes_auth_helpers import platform_admin_required
+from ..shared.auth import platform_admin_required
 from db.organization_model import OrganizationModel  # Add this import at the top
 
 user_routes = Blueprint('user_routes', __name__)
@@ -27,19 +27,18 @@ def get_user(user_id):
 def create_user():
     if request.method == 'POST':
         username = request.form.get('username')
-        email = request.form.get('email')
         password = request.form.get('password')
         role = request.form.get('role')
         organization_id = request.form.get('organization_id')
         
-        if not username or not email or not password or not role or not organization_id:
+        if not username or not password or not role or not organization_id:
             return jsonify({"error": "Missing required fields"}), 400
         
         if role not in ['librarian', 'user']:
             return jsonify({"error": "Invalid role selected"}), 400
         
         try:
-            UserModel.create_user(username, email, password, role, organization_id)
+            UserModel.create_user(username, password, role, organization_id)
             return redirect(url_for('user_routes.list_users'))
         except Exception as e:
             return jsonify({"error": str(e)}), 500
@@ -57,13 +56,12 @@ def edit_user(user_id):
     
     if request.method == 'POST':
         username = request.form.get('username')
-        email = request.form.get('email')
         role = request.form.get('role')
         organization_id = request.form.get('organization_id')
         new_password = request.form.get('new_password')
         
         try:
-            UserModel.update_user(user_id, username, email, role, organization_id)
+            UserModel.update_user(user_id, username, role, organization_id)
             
             # Update password if a new one is provided
             if new_password:
@@ -92,12 +90,11 @@ def initialize_super_user():
         if not existing_users:
             # If no users exist, create a super user
             username = "admin"
-            email = "admin@example.com"
             password = "changeme"
             role = "platform_admin"
             
             # Create the super user
-            UserModel.create_user(username, email, password, role)
+            UserModel.create_user(username, password, role)
 
             return jsonify({"message": "Super user initialized successfully"}), 201
         else:

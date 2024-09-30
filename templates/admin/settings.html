@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex-1 p-8" ng-app="adminSettingsApp" ng-controller="AdminSettingsController">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-bold mb-6">Default Settings</h2>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <div class="mb-4">
+            <h3 class="text-xl font-semibold mb-2">Add New Setting</h3>
+            <form ng-submit="addSetting()">
+                <input type="text" ng-model="newSetting.name" placeholder="Setting Name" class="border rounded px-2 py-1 mr-2">
+                <input type="text" ng-model="newSetting.default_value" placeholder="Default Value" class="border rounded px-2 py-1 mr-2">
+                <input type="text" ng-model="newSetting.description" placeholder="Description" class="border rounded px-2 py-1 mr-2">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Add Setting</button>
+            </form>
+        </div>
+
+        <table class="w-full">
+            <thead>
+                <tr class="text-left text-gray-500">
+                    <th class="pb-2">Name</th>
+                    <th class="pb-2">Default Value</th>
+                    <th class="pb-2">Description</th>
+                    <th class="pb-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="setting in settings" class="border-t">
+                    <td class="py-2">{[{ setting.name }]}</td>
+                    <td class="py-2">{[{ setting.default_value }]}</td>
+                    <td class="py-2">
+                        <span class="italic text-gray-500">{[{ setting.description }]}</span>
+                    </td>
+                    <td class="py-2">
+                        <button ng-click="editSetting(setting)" class="text-blue-500 hover:text-blue-600">Edit</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Edit Setting Modal -->
+    <div ng-if="editingSettings" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 class="text-lg font-medium leading-6 text-gray-900 mb-2">Edit Setting</h3>
+            <input type="text" ng-model="editingSetting.name" class="border rounded px-2 py-1 mb-2 w-full" readonly>
+            <input type="text" ng-model="editingSetting.default_value" class="border rounded px-2 py-1 mb-2 w-full">
+            <textarea ng-model="editingSetting.description" class="border rounded px-2 py-1 mb-2 w-full" rows="3"></textarea>
+            <div class="flex justify-end">
+                <button ng-click="updateSetting()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-2">Update</button>
+                <button ng-click="cancelEdit()" class="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+<script>
+    angular.module('adminSettingsApp', [])
+        .config(function($interpolateProvider) {
+            $interpolateProvider.startSymbol('{[{');
+            $interpolateProvider.endSymbol('}]}');
+        })
+        .controller('AdminSettingsController', function($scope, $http) {
+            $scope.settings = [[ settings | tojson | safe ]];
+            $scope.newSetting = { name: '', default_value: '', description: '' };
+            $scope.editingSettings = false;
+            $scope.editingSetting = null;
+
+            $scope.addSetting = function() {
+                $http.post('/admin/api/settings', $scope.newSetting)
+                    .then(function(response) {
+                        if (response.data.success) {
+                            $scope.settings.push($scope.newSetting);
+                            $scope.newSetting = { name: '', default_value: '', description: '' };
+                        } else {
+                            alert('Failed to add setting: ' + response.data.message);
+                        }
+                    })
+                    .catch(function(error) {
+                        alert('An error occurred while adding the setting');
+                        console.error(error);
+                    });
+            };
+
+            $scope.editSetting = function(setting) {
+                $scope.editingSetting = angular.copy(setting);
+                $scope.editingSettings = true;
+            };
+
+            $scope.updateSetting = function() {
+                $http.put('/admin/api/settings/' + $scope.editingSetting.name, $scope.editingSetting)
+                    .then(function(response) {
+                        if (response.data.success) {
+                            var index = $scope.settings.findIndex(s => s.name === $scope.editingSetting.name);
+                            if (index !== -1) {
+                                $scope.settings[index] = $scope.editingSetting;
+                            }
+                            $scope.editingSettings = false;
+                        } else {
+                            alert('Failed to update setting: ' + response.data.message);
+                        }
+                    })
+                    .catch(function(error) {
+                        alert('An error occurred while updating the setting');
+                        console.error(error);
+                    });
+            };
+
+            $scope.cancelEdit = function() {
+                $scope.editingSettings = false;
+                $scope.editingSetting = null;
+            };
+        });
+</script>
+{% endblock %}

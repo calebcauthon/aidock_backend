@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, jsonify, request
-from routes_auth_helpers import user_required
+from routes.shared.auth import user_required
 from db.user_model import UserModel
 
 profile_routes = Blueprint('profile', __name__)

@@ -1,12 +1,12 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from routes_auth_helpers import platform_admin_required
+from ..shared.auth import platform_admin_required
 from db.file_model import FileModel
 from db.organization_model import OrganizationModel
 from db.user_model import UserModel
 
-files_routes = Blueprint('files', __name__)
+files = Blueprint('files', __name__)
 
-@files_routes.route('/files')
+@files.route('/files')
 @platform_admin_required
 def list_files():
     organizations = OrganizationModel.get_all_organizations()
@@ -17,7 +17,7 @@ def list_files():
     files = FileModel.get_all_files()
     return render_template('superuser_ui/files.html', organizations=organizations_dict, users=users_dict, files=files)
 
-@files_routes.route('/files/delete/<int:file_id>', methods=['POST'])
+@files.route('/files/delete/<int:file_id>', methods=['POST'])
 @platform_admin_required
 def delete_file(file_id):
     print(f"Deleting file with ID: {file_id}")
