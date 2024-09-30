@@ -4,6 +4,9 @@ from db.organization_model import OrganizationModel
 from db.conversation_model import ConversationModel
 from db.file_model import FileModel
 from db.user_model import UserModel
+from docx import Document
+from pptx import Presentation
+import io
 
 librarian = Blueprint('librarian', __name__)
 
@@ -28,17 +31,11 @@ def upload_file(librarian_user):
         return redirect(url_for('librarian.librarian_files'))
     
     binary_content = file.read()
-    encodings = ['utf-8', 'iso-8859-1', 'windows-1252', 'ascii']
-    text_content = None
-    for encoding in encodings:
-        try:
-            text_content = binary_content.decode(encoding)
-            break
-        except UnicodeDecodeError:
-            print(f"Failed to decode with {encoding}")
-            continue
     filename = file.filename
     file_size = len(binary_content)
+    
+    # Detect file type and extract text content
+    text_content = extract_text_content(file, binary_content)
     
     # Add the file to the files table
     FileModel.add_file(
@@ -51,6 +48,42 @@ def upload_file(librarian_user):
     )
 
     return redirect(url_for('librarian.librarian_files'))
+
+def extract_text_content(file, binary_content):
+    file_extension = file.filename.split('.')[-1].lower()
+    
+    if file_extension == 'docx':
+        return extract_text_from_docx(binary_content)
+    elif file_extension == 'pptx':
+        return extract_text_from_pptx(binary_content)
+    else:
+        return decode_text_content(binary_content)
+
+def extract_text_from_docx(binary_content):
+    doc = Document(io.BytesIO(binary_content))
+    text = []
+    for para in doc.paragraphs:
+        text.append(para.text)
+    return "\n".join(text)
+
+def extract_text_from_pptx(binary_content):
+    prs = Presentation(io.BytesIO(binary_content))
+    text = []
+    for slide in prs.slides:
+        for shape in slide.shapes:
+            if hasattr(shape, "text"):
+                text.append(shape.text)
+    return "\n".join(text)
+
+def decode_text_content(binary_content):
+    encodings = ['utf-8', 'iso-8859-1', 'windows-1252', 'ascii']
+    for encoding in encodings:
+        try:
+            return binary_content.decode(encoding)
+        except UnicodeDecodeError:
+            print(f"Failed to decode with {encoding}")
+            continue
+    return None
 
 @librarian.route('/librarian-files')
 @librarian_required
