@@ -4,6 +4,8 @@ from routes.shared.auth import authenticate_user_with_token
 from prompting.hub import execute_prompt
 from db.prompt_history import save_prompt_history
 import anthropic
+from db.settings_model import SettingsModel
+from db.organization_model import OrganizationModel
 
 chat = Blueprint('chat', __name__)
 
@@ -68,4 +70,31 @@ def prompt():
 
         return jsonify({"title": summary})
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@chat.route('/api/organization_settings', methods=['GET'])
+@authenticate_user_with_token
+def get_organization_settings(user):
+    organization_id = request.args.get('organization_id')
+    
+    if not organization_id:
+        return jsonify({"error": "Organization ID is required"}), 400
+
+    try:
+        organization = OrganizationModel.get_organization(organization_id)
+        
+        if not organization:
+            return jsonify({"error": "Organization not found"}), 404
+
+        settings = SettingsModel.get_organization_settings(organization_id)
+        
+        if not settings:
+            return jsonify({"error": "Settings not found for this organization"}), 404
+
+        settings_dict = {setting['name']: setting['value'] for setting in settings}
+        return jsonify({
+            "title_text": settings_dict.get('title_text', 'Messaging'),
+        })
+    except Exception as e:
+        raise e
         return jsonify({"error": str(e)}), 500
