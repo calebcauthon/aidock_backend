@@ -100,63 +100,50 @@ class OrganizationModel:
         return result[0][0] if result else None
 
     @staticmethod
+    def get_all_websites_for_organization(organization_id):
+        conn = create_connection()
+        query = """
+            SELECT ow.id, ow.url, 'organization' as type
+            FROM organization_websites ow
+            WHERE ow.organization_id = ?
+        """
+        websites = execute_sql(conn, query, (organization_id,))
+        conn.close()
+        return [{'id': row[0], 'url': row[1], 'type': row[2]} for row in websites]
+
+
+    @staticmethod
     def get_user_websites(user_id):
         conn = create_connection()
-        query = """
-            SELECT ow.id, ow.url
-            FROM organization_websites ow
-            JOIN users u ON u.organization_id = ow.organization_id
-            WHERE u.id = ?
-        """
-        websites = execute_sql(conn, query, (user_id,))
+        websites = execute_sql(conn, 'SELECT id, website_url, is_active FROM user_websites WHERE user_id = ?', (user_id,))
         conn.close()
-        return [{'id': row[0], 'url': row[1], 'is_active': True} for row in websites]
+        return websites
 
     @staticmethod
-    def get_user_website_overrides(user_id):
+    def toggle_user_website(user_id, website_url, is_active):
         conn = create_connection()
-        query = """
-            SELECT uw.website_id, uw.is_active, ow.url
-            FROM user_websites uw
-            JOIN organization_websites ow ON uw.website_id = ow.id
-            WHERE uw.user_id = ?
-        """
-        overrides = execute_sql(conn, query, (user_id,))
+        execute_sql(conn, 'DELETE FROM user_websites WHERE user_id = ? AND website_url = ?', (user_id, website_url))
+        execute_sql(conn, 'INSERT INTO user_websites (user_id, website_url, is_active) VALUES (?, ?, ?)', (user_id, website_url, is_active))
         conn.close()
-        return [{'id': row[0], 'is_active': row[1], 'url': row[2]} for row in overrides]
+        return True
 
     @staticmethod
-    def toggle_user_website(user_id, website_id, is_active):
+    def add_user_website(user_id, website_url):
         conn = create_connection()
-        try:
-            query = """
-                INSERT INTO user_websites (user_id, website_id, is_active)
-                VALUES (?, ?, ?)
-                ON CONFLICT(user_id, website_id) DO UPDATE SET is_active = ?
-            """
-            execute_sql(conn, query, (user_id, website_id, is_active, is_active))
-            conn.close()
-            return True
-        except Exception as e:
-            conn.close()
-            raise e
+        # Check if the user_id/website combination already exists
+        existing_website = execute_sql(conn, 'SELECT id FROM user_websites WHERE user_id = ? AND website_url = ?', (user_id, website_url))
+        
+        if not existing_website:
+            execute_sql(conn, '''\
+                INSERT OR IGNORE INTO user_websites (user_id, website_url)
+                    VALUES (?, ?)
+                ''', (user_id, website_url))
+        conn.close()
+        return True
 
     @staticmethod
-    def add_user_website(user_id, website_id):
+    def remove_user_website(user_id, website_url):
         conn = create_connection()
-        try:
-            query = "INSERT INTO user_websites (user_id, website_id) VALUES (?, ?)"
-            execute_sql(conn, query, (user_id, website_id))
-            conn.close()
-            return True
-        except Exception as e:
-            conn.close()
-            raise e
-
-    @staticmethod
-    def remove_user_website(user_id, website_id):
-        conn = create_connection()
-        query = "DELETE FROM user_websites WHERE user_id = ? AND website_id = ?"
-        execute_sql(conn, query, (user_id, website_id))
+        execute_sql(conn, 'DELETE FROM user_websites WHERE user_id = ? AND website_url = ?', (user_id, website_url))
         conn.close()
         return True

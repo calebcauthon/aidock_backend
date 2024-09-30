@@ -5,19 +5,46 @@
 {% endblock %}
 
 {% block content %}
+<div class="bg-white shadow-md rounded-lg p-6 mb-6">
+    <h2 class="text-xl font-semibold mb-4">Add New Website</h2>
+    <form id="addWebsiteForm" class="flex items-center">
+        <input type="text" id="newWebsiteUrl" placeholder="Enter Website URL" class="flex-grow mr-2 p-2 border rounded" required>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add Website</button>
+    </form>
+</div>
+
 <div class="bg-white shadow-md rounded-lg p-6">
     <h2 class="text-xl font-semibold mb-4">Organization Websites</h2>
-    <ul class="space-y-4">
+    <ul id="websiteList" class="space-y-4">
         {% for website in websites %}
         <li class="flex items-center justify-between">
             <span class="text-lg">[[ website['url'] ]]</span>
-            <label class="inline-flex items-center cursor-pointer">
-                <input type="checkbox" class="hidden website-toggle" data-website-id="[[ website['id'] ]]" {% if website['is_active'] %}checked{% endif %}>
-                <div class="relative">
-                    <div class="w-10 h-6 bg-gray-300 rounded-full shadow-inner"></div>
-                    <div class="toggle-dot absolute w-4 h-4 bg-white rounded-full shadow inset-y-0 left-0 transition-transform duration-300 ease-in-out {% if website.is_active %}translate-x-full bg-blue-500{% endif %}"></div>
-                </div>
-            </label>
+            <div class="flex items-center">
+                <label class="inline-flex items-center cursor-pointer mr-4">
+                    <input type="checkbox" class="hidden website-toggle" data-website-url="[[ website['url'] ]]" {% if website['is_active'] %}checked{% endif %}>
+                    <div class="relative">
+                        <div class="w-10 h-6 bg-gray-300 rounded-full shadow-inner"></div>
+                        <div class="toggle-dot absolute w-4 h-4 bg-white rounded-full shadow inset-y-0 left-0 transition-transform duration-300 ease-in-out {% if website['is_active'] %}translate-x-full bg-blue-500{% endif %}"></div>
+                    </div>
+                </label>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="bg-white shadow-md rounded-lg p-6 mt-6">
+    <h2 class="text-xl font-semibold mb-4">User Overrides</h2>
+    <ul id="userWebsiteList" class="space-y-4">
+        {% for website in user_websites %}
+        <li class="flex items-center justify-between">
+            <span class="text-lg">[[ website[1] ]]</span>
+            <div class="flex items-center">
+                <span class="mr-4">
+                    Status: [[ 'Active' if website[2] else 'Inactive' ]]
+                </span>
+                <button class="remove-user-website text-red-500 hover:text-red-700" data-website-url="[[ website[1] ]]">Remove</button>
+            </div>
         </li>
         {% endfor %}
     </ul>
@@ -28,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggles = document.querySelectorAll('.website-toggle');
     toggles.forEach(toggle => {
         toggle.addEventListener('change', function() {
-            const websiteId = this.dataset.websiteId;
+            const websiteUrl = this.dataset.websiteUrl;
             const isActive = this.checked;
             fetch('/api/user/websites/toggle', {
                 method: 'POST',
@@ -36,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Content-Type': 'application/json',
                     'Login-Token': '[[ user['login_token'] ]]'
                 },
-                body: JSON.stringify({ website_id: websiteId, is_active: isActive }),
+                body: JSON.stringify({ website_url: websiteUrl, is_active: isActive }),
             })
             .then(response => response.json())
             .then(data => {
@@ -55,6 +82,64 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+
+    // Add new website
+    const addWebsiteForm = document.getElementById('addWebsiteForm');
+    addWebsiteForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const websiteUrl = document.getElementById('newWebsiteUrl').value;
+        fetch('/api/user/websites/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Login-Token': '[[ user['login_token'] ]]'
+            },
+            body: JSON.stringify({ website_url: websiteUrl }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload(); // Reload the page to show the new website
+            } else {
+                alert('Failed to add website: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while adding the website');
+        });
+    });
+
+    // Remove website
+    const removeButtons = document.querySelectorAll('.remove-user-website');
+    removeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const websiteUrl = this.dataset.websiteUrl;
+            if (confirm('Are you sure you want to remove this website?')) {
+                fetch('/api/user/websites/remove', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Login-Token': '[[ user['login_token'] ]]'
+                    },
+                    body: JSON.stringify({ website_url: websiteUrl }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload(); // Reload the page to update the website list
+                    } else {
+                        alert('Failed to remove website: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while removing the website');
+                });
+            }
+        });
+    });
+
 });
 </script>
 {% endblock %}

@@ -111,11 +111,9 @@ def create_table(conn):
             CREATE TABLE IF NOT EXISTS user_websites (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
-                website_id INTEGER NOT NULL,
-                is_active BOOLEAN NOT NULL DEFAULT TRUE,
-                FOREIGN KEY (user_id) REFERENCES users (id),
-                FOREIGN KEY (website_id) REFERENCES organization_websites (id),
-                UNIQUE(user_id, website_id)
+                website_url TEXT NOT NULL,
+                is_active BOOLEAN DEFAULT TRUE,
+                FOREIGN KEY (user_id) REFERENCES users (id)
             )
         """)
         conn.commit()
