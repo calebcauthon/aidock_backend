@@ -91,10 +91,12 @@ platform_admin_pages = Blueprint('platform_admin_pages', __name__)
 @platform_admin_pages.route('/api/organization/<int:org_id>/websites', methods=['GET'])
 @platform_admin_required
 def get_organization_websites(org_id):
+    print(f"org_id: {org_id}")
     try:
         websites = OrganizationModel.get_organization_websites(org_id)
         return jsonify(websites)
     except Exception as e:
+        raise e
         return jsonify({"error": str(e)}), 500
 
 @platform_admin_pages.route('/api/organization/<int:org_id>/websites', methods=['POST'])
@@ -115,7 +117,29 @@ def add_organization_website(org_id):
 @platform_admin_required
 def remove_organization_website(org_id, website_id):
     try:
-        OrganizationModel.remove_organization_website(org_id, website_id)
+        entry = OrganizationModel.get_organization_website_entry(website_id)
+        url = entry['url']
+        OrganizationModel.remove_organization_website(org_id, url)
         return jsonify({"success": True, "message": "Website removed successfully"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@platform_admin_pages.route('/api/organization/<int:org_id>/refresh-settings', methods=['POST'])
+@platform_admin_required
+def refresh_organization_settings(org_id):
+    try:
+        # Get all default settings
+        default_settings = SettingsModel.get_default_settings()
+        
+        # Get current organization settings
+        current_settings = SettingsModel.get_organization_settings(org_id)
+        current_setting_names = {setting['name'] for setting in current_settings}
+        
+        # Add missing settings
+        for default_setting in default_settings:
+            if default_setting['name'] not in current_setting_names:
+                SettingsModel.update_organization_setting(org_id, default_setting['name'], default_setting['default_value'])
+        
+        return jsonify({"success": True, "message": "Settings refreshed successfully"})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500

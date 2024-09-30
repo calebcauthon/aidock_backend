@@ -97,10 +97,10 @@ class OrganizationModel:
             raise e
 
     @staticmethod
-    def remove_organization_website(org_id, website_id):
+    def remove_organization_website(org_id, url):
         conn = create_connection()
-        execute_sql(conn, "DELETE FROM organization_websites WHERE id = ? AND organization_id = ?", 
-                    (website_id, org_id))
+        execute_sql(conn, "DELETE FROM organization_websites WHERE organization_id = ? AND url = ?", 
+                    (org_id, url))
         conn.close()
         return True
 
@@ -145,6 +145,25 @@ class OrganizationModel:
         conn.close()
         return [{'id': row[0], 'url': row[1], 'type': row[2]} for row in websites]
 
+    @staticmethod
+    def get_organization_website_entry(website_id):
+        conn = create_connection()
+        query = "SELECT id, organization_id, url FROM organization_websites WHERE id = ?"
+        try:
+            result = execute_sql(conn, query, (website_id,))
+            conn.close()
+            if result:
+                return {
+                    'id': result[0][0],
+                    'organization_id': result[0][1],
+                    'url': result[0][2]
+                }
+            else:
+                return None
+        except Exception as e:
+            print(f"Error fetching organization website entry: {e}")
+            conn.close()
+            return None
 
     @staticmethod
     def get_user_websites(user_id):
@@ -182,14 +201,8 @@ class OrganizationModel:
         conn.close()
         return True
 
-    def get_organization_websites(self, org_id):
-        conn = create_connection()
-        query = "SELECT id, url FROM organization_websites WHERE organization_id = ?"
-        result = execute_sql(conn, query, (org_id,))
-        conn.close()
-        return [{'id': row[0], 'url': row[1]} for row in result]
-
-    def add_organization_website(self, org_id, website_url):
+    @staticmethod
+    def add_organization_website(org_id, website_url):
         conn = create_connection()
         query = "INSERT INTO organization_websites (organization_id, url) VALUES (?, ?)"
         try:
@@ -201,7 +214,8 @@ class OrganizationModel:
             conn.close()
             return False
 
-    def remove_organization_website(self, org_id, website_url):
+    @staticmethod
+    def remove_organization_website(org_id, website_url):
         conn = create_connection()
         query = "DELETE FROM organization_websites WHERE organization_id = ? AND url = ?"
         try:

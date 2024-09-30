@@ -48,7 +48,12 @@ class UserModel:
         user = execute_sql(conn, "SELECT id, username, email, role, organization_id, login_token FROM users WHERE id = ?", (user_id,))
         user = {"id": user[0][0], "username": user[0][1], "email": user[0][2], "role": user[0][3], "organization_id": user[0][4], "login_token": user[0][5]} if user else None
 
-        user['organization_name'] = execute_sql(conn, "SELECT name FROM organizations WHERE id = ?", (user['organization_id'],))[0][0]
+
+        if user['organization_id'] is not None:
+            org_result = execute_sql(conn, "SELECT name FROM organizations WHERE id = ?", (user['organization_id'],))
+            user['organization_name'] = org_result[0][0] if org_result else None
+        else:
+            user['organization_name'] = 'platform admin'
         conn.close()
 
         return user if user else None
