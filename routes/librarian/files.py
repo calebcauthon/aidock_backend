@@ -57,7 +57,7 @@ def upload_file(librarian_user):
 def librarian_files(librarian_user):
     organization = OrganizationModel.get_organization(librarian_user['organization_id'])
     files = FileModel.get_files_for_organization(librarian_user['organization_id'])
-    return render_template('librarian/librarian_files.html', librarian=librarian, organization=organization, files=files)
+    return render_template('librarian/librarian_files.html', librarian=librarian_user, organization=organization, files=files)
 
 @librarian.route('/librarian/files', methods=['GET'])
 @librarian_required

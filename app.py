@@ -5,6 +5,7 @@ from db.init_db import create_table
 import psycopg2
 from db.user_model import UserModel
 from routes import register_routes
+from routes.user.files_api import files_api
 
 app = Flask(__name__, static_folder='static')
 app.template_folder = 'templates'
@@ -71,3 +72,5 @@ def home():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=True, port=port)
+
+app.register_blueprint(files_api, url_prefix='/api/user/files')

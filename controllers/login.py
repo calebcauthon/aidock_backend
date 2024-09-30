@@ -27,13 +27,12 @@ def login_controller(dependencies):
 
             set_librarian_session(user)
 
-            flash('Logged in successfully.', 'success')
             if session['role'] == 'platform_admin':
-                return redirect(url_for('platform_admin_pages.prompt_history'))
+                return redirect(url_for('history.prompt_history'))
             elif session['role'] == 'librarian':
                 return redirect(url_for('librarian.librarian_home'))
             else:
-                return redirect(url_for('profile.profile'))
+                return redirect(url_for('files_page.user_files'))
         else:
             flash(f'Invalid username or password, username: {username}, password: [{password}]', 'error')
     

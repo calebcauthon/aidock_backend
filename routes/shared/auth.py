@@ -61,6 +61,7 @@ def user_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session and session.get('role') not in ['user', 'librarian', 'platform_admin']:
+            print(f"User not in session: {session.get('role')}")
             flash('You do not have user permission to access this page.', 'error')
             return redirect(url_for('auth.login'))
 

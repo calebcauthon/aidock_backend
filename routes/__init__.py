@@ -9,6 +9,8 @@ from .admin.organization import organization_routes, platform_admin_pages
 from .admin.history import history
 from .admin.users import user_routes
 from .dock.verify import verify_website
+from .user.files_api import files_api
+from .user.files_page import files_page
 
 def register_routes(app):
     app.register_blueprint(auth)
@@ -23,3 +25,5 @@ def register_routes(app):
     app.register_blueprint(history)
     app.register_blueprint(user_routes, url_prefix='/users')
     app.register_blueprint(verify_website)
+    app.register_blueprint(files_api)
+    app.register_blueprint(files_page)
