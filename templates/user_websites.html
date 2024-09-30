@@ -24,8 +24,11 @@
                     <input type="checkbox" class="hidden website-toggle" data-website-url="[[ website['url'] ]]" {% if website['is_active'] %}checked{% endif %}>
                     <div class="relative">
                         <div class="w-10 h-6 bg-gray-300 rounded-full shadow-inner"></div>
-                        <div class="toggle-dot absolute w-4 h-4 bg-white rounded-full shadow inset-y-0 left-0 transition-transform duration-300 ease-in-out {% if website['is_active'] %}translate-x-full bg-blue-500{% endif %}"></div>
+                        <div class="toggle-dot absolute w-4 h-4 rounded-full shadow inset-y-0 left-0 transition-transform duration-300 ease-in-out {% if website['is_active'] %}translate-x-full bg-green-500{% else %}bg-red-500{% endif %}"></div>
                     </div>
+                    <span class="ml-2 text-sm font-medium {% if website['is_active'] %}text-green-500{% else %}text-red-500{% endif %}">
+                        {% if website['is_active'] %}ON{% else %}OFF{% endif %}
+                    </span>
                 </label>
             </div>
         </li>
@@ -69,8 +72,13 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success) {
                     const dot = this.parentElement.querySelector('.toggle-dot');
+                    const statusText = this.parentElement.querySelector('span');
                     dot.classList.toggle('translate-x-full');
-                    dot.classList.toggle('bg-blue-500');
+                    dot.classList.toggle('bg-green-500');
+                    dot.classList.toggle('bg-red-500');
+                    statusText.classList.toggle('text-green-500');
+                    statusText.classList.toggle('text-red-500');
+                    statusText.textContent = isActive ? 'ON' : 'OFF';
                 } else {
                     console.error('Failed to update website status');
                     this.checked = !isActive;
