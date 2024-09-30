@@ -89,7 +89,7 @@ def get_organization_settings(user):
         settings = SettingsModel.get_organization_settings(organization_id)
         
         if not settings:
-            return jsonify({"error": "Settings not found for this organization"}), 404
+            return jsonify({})
 
         settings_dict = {setting['name']: setting['value'] for setting in settings}
         return jsonify(settings_dict)
