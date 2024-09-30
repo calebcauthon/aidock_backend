@@ -1,50 +1,63 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div ng-app="organizationApp" ng-controller="OrganizationController">
-    <h1>Edit Organization</h1>
-    <form ng-submit="updateOrganization()">
-        <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" class="form-control" id="name" ng-model="organization.name" required>
-        </div>
-        <div class="form-group">
-            <label for="description">Description</label>
-            <textarea class="form-control" id="description" ng-model="organization.description" rows="3"></textarea>
-        </div>
-        <button type="submit" class="btn">Update Organization</button>
-    </form>
-
-    <h2>Organization Websites</h2>
-    <div id="websiteList">
-        <div ng-repeat="website in websites">
-            {{ website.url }}
-            <button ng-click="removeWebsite(website.id)">Remove</button>
-        </div>
-    </div>
-    <div class="form-group">
-        <input type="text" ng-model="newWebsiteUrl" placeholder="Enter new website URL">
-        <button ng-click="addWebsite()" class="btn">Add Website</button>
+<div ng-app="organizationApp" ng-controller="OrganizationController" class="flex-1 p-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl font-bold">Edit Organization</h1>
     </div>
 
-    <h2>Organization Settings</h2>
-    <button ng-click="refreshSettings()" class="btn btn-secondary mb-3">Refresh from Defaults</button>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Setting</th>
-                <th>Value</th>
-                <th>Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr ng-repeat="setting in settings">
-                <td>{{ setting.name }}</td>
-                <td>{{ setting.value }}</td>
-                <td>{{ setting.description }}</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Organization Details</h2>
+        <form ng-submit="updateOrganization()">
+            <div class="mb-4">
+                <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                <input type="text" class="mt-1 block w-full border rounded-md shadow-sm p-2" id="name" ng-model="organization.name" required>
+            </div>
+            <div class="mb-4">
+                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea class="mt-1 block w-full border rounded-md shadow-sm p-2" id="description" ng-model="organization.description" rows="3"></textarea>
+            </div>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Update Organization</button>
+        </form>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Organization Websites</h2>
+        <ul id="websiteList" class="space-y-4 mb-4">
+            <li ng-repeat="website in websites" class="flex items-center justify-between">
+                <span class="text-lg">{{ website.url }}</span>
+                <button ng-click="removeWebsite(website.id)" class="text-red-500 hover:text-red-700">Remove</button>
+            </li>
+            <li ng-if="websites.length === 0">
+                <em class="text-gray-400">No organization websites added yet</em>
+            </li>
+        </ul>
+        <div class="flex items-center">
+            <input type="text" ng-model="newWebsiteUrl" placeholder="Enter new website URL" class="flex-grow mr-2 p-2 border rounded">
+            <button ng-click="addWebsite()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add Website</button>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Organization Settings</h2>
+        <button ng-click="refreshSettings()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mb-4">Refresh from Defaults</button>
+        <table class="w-full">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="text-left p-2">Setting</th>
+                    <th class="text-left p-2">Value</th>
+                    <th class="text-left p-2">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="setting in settings" class="border-b">
+                    <td class="p-2">{{ setting.name }}</td>
+                    <td class="p-2">{{ setting.value }}</td>
+                    <td class="p-2">{{ setting.description }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
