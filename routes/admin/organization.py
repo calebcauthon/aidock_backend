@@ -82,7 +82,7 @@ def view_organization(org_id):
         organization = execute_sql(conn, "SELECT * FROM organizations WHERE id = ?", (org_id,))
         if organization:
             # Fetch users belonging to this organization
-            users = execute_sql(conn, "SELECT id, username, email, role FROM users WHERE organization_id = ?", (org_id,))
+            users = execute_sql(conn, "SELECT id, username, role FROM users WHERE organization_id = ?", (org_id,))
             conn.close()
             return render_template('superuser_ui/view_organization.html', organization=organization[0], users=users)
     conn.close()
