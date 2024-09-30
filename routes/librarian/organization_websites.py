@@ -10,7 +10,7 @@ def organization_websites_page(librarian_user):
     org_id = librarian_user['organization_id']
     org_model = OrganizationModel()
     websites = org_model.get_organization_websites(org_id)
-    return render_template('librarian_websites.html', websites=websites, user=librarian_user)
+    return render_template('librarian_websites.html', websites=websites, librarian_user=librarian_user)
 
 @librarian_websites_bp.route('/api/librarian/websites/add', methods=['POST'])
 @librarian_required
