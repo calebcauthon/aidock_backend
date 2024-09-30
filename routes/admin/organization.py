@@ -45,8 +45,9 @@ def edit_organization(org_id):
     conn = create_connection()
     if conn is not None:
         if request.method == 'POST':
-            name = request.form.get('name')
-            description = request.form.get('description')
+            data = request.json
+            name = data.get('name')
+            description = data.get('description')
             
             execute_sql(conn, "UPDATE organizations SET name = ?, description = ? WHERE id = ?", (name, description, org_id))
             conn.close()
