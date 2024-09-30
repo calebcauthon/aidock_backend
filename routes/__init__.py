@@ -11,6 +11,7 @@ from .admin.users import user_routes
 from .dock.verify import verify_website
 from .user.files_api import files_api
 from .user.files_page import files_page
+from .user.websites import websites_bp
 
 def register_routes(app):
     app.register_blueprint(auth)
@@ -27,3 +28,4 @@ def register_routes(app):
     app.register_blueprint(verify_website)
     app.register_blueprint(files_api)
     app.register_blueprint(files_page)
+    app.register_blueprint(websites_bp)

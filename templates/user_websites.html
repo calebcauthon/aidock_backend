@@ -1,0 +1,60 @@
+{% extends "base_user.html" %}
+
+{% block title %}
+<h1 class="text-2xl font-bold">Websites</h1>
+{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow-md rounded-lg p-6">
+    <h2 class="text-xl font-semibold mb-4">Organization Websites</h2>
+    <ul class="space-y-4">
+        {% for website in websites %}
+        <li class="flex items-center justify-between">
+            <span class="text-lg">[[ website['url'] ]]</span>
+            <label class="inline-flex items-center cursor-pointer">
+                <input type="checkbox" class="hidden website-toggle" data-website-id="[[ website['id'] ]]" {% if website['is_active'] %}checked{% endif %}>
+                <div class="relative">
+                    <div class="w-10 h-6 bg-gray-300 rounded-full shadow-inner"></div>
+                    <div class="toggle-dot absolute w-4 h-4 bg-white rounded-full shadow inset-y-0 left-0 transition-transform duration-300 ease-in-out {% if website.is_active %}translate-x-full bg-blue-500{% endif %}"></div>
+                </div>
+            </label>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggles = document.querySelectorAll('.website-toggle');
+    toggles.forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            const websiteId = this.dataset.websiteId;
+            const isActive = this.checked;
+            fetch('/api/user/websites/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Login-Token': '[[ user['login_token'] ]]'
+                },
+                body: JSON.stringify({ website_id: websiteId, is_active: isActive }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const dot = this.parentElement.querySelector('.toggle-dot');
+                    dot.classList.toggle('translate-x-full');
+                    dot.classList.toggle('bg-blue-500');
+                } else {
+                    console.error('Failed to update website status');
+                    this.checked = !isActive;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                this.checked = !isActive;
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

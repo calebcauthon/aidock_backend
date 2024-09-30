@@ -15,6 +15,7 @@
                 <ul class="space-y-2">
                     <li class="py-2 px-4 {% if request.path == '/profile' %}bg-gray-700{% endif %} rounded"><a href="[[ url_for('profile.profile') ]]">Profile</a></li>
                     <li class="py-2 px-4 {% if request.path == '/files' %}bg-gray-700{% endif %} rounded"><a href="[[ url_for('files_page.user_files') ]]">Files</a></li>
+                    <li class="py-2 px-4 {% if request.path == '/websites' %}bg-gray-700{% endif %} rounded"><a href="[[ url_for('websites.user_websites') ]]">Websites</a></li>
                 </ul>
             </nav>
         </div>
