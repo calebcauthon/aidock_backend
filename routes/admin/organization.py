@@ -53,8 +53,14 @@ def edit_organization(org_id):
             return redirect(url_for('organization_routes.list_organizations'))
         else:
             organization = execute_sql(conn, "SELECT * FROM organizations WHERE id = ?", (org_id,))
+            
+            # Fetch organization settings
+            settings = SettingsModel.get_organization_settings(org_id)
+            
             conn.close()
-            return render_template('organizations/edit.html', organization=organization[0] if organization else None)
+            return render_template('organizations/edit.html', 
+                                   organization=organization[0] if organization else None,
+                                   settings=settings)
     return jsonify({"error": "Unable to connect to the database"}), 500
 
 @organization_routes.route('/<int:org_id>/delete', methods=['POST'])

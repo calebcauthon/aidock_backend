@@ -50,3 +50,12 @@ class SettingsModel:
                         (organization_id, setting['name'], setting['default_value']))
         conn.close()
         return True
+
+    @staticmethod
+    def get_organization_settings(org_id):
+        conn = create_connection()
+        if conn is not None:
+            settings = execute_sql(conn, "SELECT name, value FROM organization_settings WHERE organization_id = ?", (org_id,))
+            conn.close()
+            return [{"name": setting[0], "value": setting[1]} for setting in settings]
+        return []
