@@ -12,41 +12,39 @@ class UserModel:
     @staticmethod
     def get_users_for_organization(organization_id):
         conn = create_connection()
-        users = execute_sql(conn, "SELECT id, username, email, role FROM users WHERE organization_id = ?", (organization_id,))
-        users = [{"id": user[0], "username": user[1], "email": user[2], "role": user[3]} for user in users]
+        users = execute_sql(conn, "SELECT id, username, role FROM users WHERE organization_id = ?", (organization_id,))
+        users = [{"id": user[0], "username": user[1], "role": user[2]} for user in users]
         conn.close()
         return users
 
     def get_user_by_login_token(login_token):
         conn = create_connection()
-        user = execute_sql(conn, "SELECT id, username, email, role, organization_id FROM users WHERE login_token = ?", (login_token,))
+        user = execute_sql(conn, "SELECT id, username, role, organization_id FROM users WHERE login_token = ?", (login_token,))
         conn.close()
 
         if user:
             return {
                 "id": user[0][0],
                 "username": user[0][1],
-                "email": user[0][2],
-                "role": user[0][3],
-                "organization_id": user[0][4]
+                "role": user[0][2],
+                "organization_id": user[0][3]
             }
         return None
-
 
     @staticmethod
     def get_all_users():
         conn = create_connection()
-        users = execute_sql(conn, "SELECT id, username, email, role, organization_id FROM users")
-        users = [{"id": user[0], "username": user[1], "email": user[2], "role": user[3], "organization_id": user[4]} for user in users]
+        users = execute_sql(conn, "SELECT id, username, role, organization_id FROM users")
+        users = [{"id": user[0], "username": user[1], "role": user[2], "organization_id": user[3]} for user in users]
         conn.close()
-
         return users
 
     @staticmethod
     def get_user(user_id):
         conn = create_connection()
-        user = execute_sql(conn, "SELECT id, username, email, role, organization_id, login_token FROM users WHERE id = ?", (user_id,))
-        user = {"id": user[0][0], "username": user[0][1], "email": user[0][2], "role": user[0][3], "organization_id": user[0][4], "login_token": user[0][5]} if user else None
+        user = execute_sql(conn, "SELECT id, username, role, organization_id, login_token FROM users WHERE id = ?", (user_id,))
+        print(f"sql result user: {user}")
+        user = {"id": user[0][0], "username": user[0][1], "role": user[0][2], "organization_id": user[0][3], "login_token": user[0][4]} if user else None
 
 
         if user['organization_id'] is not None:
@@ -59,13 +57,13 @@ class UserModel:
         return user if user else None
 
     @staticmethod
-    def create_user(username, email, password, role, organization_id=-1):
+    def create_user(username, password, role, organization_id=-1):
         conn = create_connection()
         hashed_password = generate_password_hash(password)
 
         try:
-            execute_sql(conn, "INSERT INTO users (username, email, password_hash, role, organization_id) VALUES (?, ?, ?, ?, ?)", 
-                        (username, email, hashed_password, role, organization_id))
+            execute_sql(conn, "INSERT INTO users (username, password_hash, role, organization_id) VALUES (?, ?, ?, ?)", 
+                        (username, hashed_password, role, organization_id))
             conn.close()
             return True
         except Exception as e:
@@ -73,10 +71,10 @@ class UserModel:
             raise e
 
     @staticmethod
-    def update_user(user_id, username, email, role, password=None):
+    def update_user(user_id, username, role, password=None):
         conn = create_connection()
-        update_fields = ["username = ?", "email = ?", "role = ?"]
-        params = [username, email, role, user_id]
+        update_fields = ["username = ?", "role = ?"]
+        params = [username, role, user_id]
 
         if password:
             update_fields.append("password_hash = ?")
@@ -93,7 +91,6 @@ class UserModel:
             conn.close()
             raise e
 
-
     @staticmethod
     def delete_user(user_id):
         conn = create_connection()
@@ -104,10 +101,9 @@ class UserModel:
     @staticmethod
     def get_user_by_username(username):
         conn = create_connection()
-        user = execute_sql(conn, "SELECT id, username, email, password_hash, organization_id, role FROM users WHERE username = ?", (username,))
-        user = {"id": user[0][0], "username": user[0][1], "email": user[0][2], "password_hash": user[0][3], "organization_id": user[0][4], "role": user[0][5]} if user else None
+        user = execute_sql(conn, "SELECT id, username, password_hash, organization_id, role FROM users WHERE username = ?", (username,))
+        user = {"id": user[0][0], "username": user[0][1], "password_hash": user[0][2], "organization_id": user[0][3], "role": user[0][4]} if user else None
         conn.close()
-
         return user if user else None
 
     @staticmethod
@@ -117,7 +113,6 @@ class UserModel:
         conn.close()
         return True
 
-    
     @staticmethod
     def update_username(user_id, new_username):
         conn = create_connection()

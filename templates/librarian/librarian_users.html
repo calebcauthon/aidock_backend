@@ -24,7 +24,6 @@
                 <tr class="text-left text-gray-500">
                     <th class="pb-2">ID</th>
                     <th class="pb-2">USERNAME</th>
-                    <th class="pb-2">EMAIL</th>
                     <th class="pb-2">ROLE</th>
                     <th class="pb-2">ACTIONS</th>
                 </tr>
@@ -34,7 +33,6 @@
                 <tr class="border-t">
                     <td class="py-2">[[user.id]]</td>
                     <td class="py-2">[[user.username]]</td>
-                    <td class="py-2">[[user.email]]</td>
                     <td class="py-2">[[user.role]]</td>
                     <td class="py-2">
                         <a href="[[ url_for('librarian_users.edit_user', user_id=user.id) ]]" class="text-blue-500 hover:text-blue-600 mr-2">Edit</a>

@@ -67,7 +67,7 @@ def get_session_user_info():
 
 @app.route('/')
 def home():
-    return redirect(url_for('platform_admin_pages.prompt_history'))
+    return redirect(url_for('history.prompt_history'))
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
