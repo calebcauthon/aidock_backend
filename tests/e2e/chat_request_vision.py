@@ -1,15 +1,11 @@
 import sys
 import os
+import base64
 
 # Add the project root directory to the Python path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.append(project_root)
 
-import subprocess
-import json
-from db.init_db import create_connection
-
-import sys
 import subprocess
 import json
 from db.init_db import create_connection
@@ -26,19 +22,43 @@ def get_login_token(username):
 
     return None
 
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
 def send_chat_request(login_token):
+    # Read and encode the image
+    image_path = os.path.join(project_root, 'tests', 'e2e', 'sales_flow.png')
+    base64_image = encode_image(image_path)
+
     curl_command = [
         'curl', '-X', 'POST', 'http://localhost:5000/ask',
         '-H', 'Content-Type: application/json',
         '-H', f'Login-Token: {login_token}',
         '-d', json.dumps({
-            "question": "What is the capital of France?",
+            "question": "Which roles are part of the workshop phase?",
             "url": "https://example.com/page",
             "pageTitle": "Example Page",
             "selectedText": "Some selected text on the page",
             "activeElement": "body > div.content > p",
             "scrollPosition": 500,
             "conversationMessages": [
+                {
+                    "type": "user",
+                    "content": [
+                        {"type": "text", "text": "Here's a sales flow diagram:"},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/png;base64,{base64_image}",
+                            },
+                        }
+                    ],
+                },
+                {
+                    "type": "user",
+                    "content": "Which roles are part of the workshop phase?"
+                }
             ]
         })
     ]
