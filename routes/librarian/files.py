@@ -7,6 +7,8 @@ from db.user_model import UserModel
 from docx import Document
 from pptx import Presentation
 import io
+import base64
+import mimetypes
 
 librarian = Blueprint('librarian', __name__)
 
@@ -135,4 +137,20 @@ def preview_file(librarian_user, file_id):
     if not file:
         return jsonify({"error": f"File with id {file_id} not found"}), 404
 
-    return jsonify({"name": file['name'], "content": file['text_content']})
+    mime_type, _ = mimetypes.guess_type(file['name'])
+    
+    if mime_type and mime_type.startswith('image/'):
+        # For image files, return base64 encoded binary content
+        base64_image = base64.b64encode(file['binary_content']).decode('utf-8')
+        return jsonify({
+            "name": file['name'],
+            "content": base64_image,
+            "mime_type": mime_type
+        })
+    else:
+        # For non-image files, return text content as before
+        return jsonify({
+            "name": file['name'],
+            "content": file['text_content'],
+            "mime_type": mime_type or "text/plain"
+        })
