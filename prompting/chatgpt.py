@@ -39,7 +39,8 @@ def prompt_chatgpt(prompt_data, model: str = "gpt-4o") -> str:
 
     # Add previous conversation messages
     for msg in prompt_data['conversation_messages']:
-        messages.append({"role": msg['type'], "content": msg['content']})
+        role = msg['type'] if msg['type'] in ['system', 'user'] else 'user'
+        messages.append({"role": role, "content": msg['content']})
 
     # Add the current user question
     messages.append({"role": "user", "content": prompt_data['question']})
