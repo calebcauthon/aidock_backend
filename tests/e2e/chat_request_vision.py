@@ -27,7 +27,6 @@ def encode_image(image_path):
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 def send_chat_request(login_token):
-    # Read and encode the image
     image_path = os.path.join(project_root, 'tests', 'e2e', 'sales_flow.png')
     base64_image = encode_image(image_path)
 
@@ -43,18 +42,6 @@ def send_chat_request(login_token):
             "activeElement": "body > div.content > p",
             "scrollPosition": 500,
             "conversationMessages": [
-                {
-                    "type": "user",
-                    "content": [
-                        {"type": "text", "text": "Here's a sales flow diagram:"},
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/png;base64,{base64_image}",
-                            },
-                        }
-                    ],
-                },
                 {
                     "type": "user",
                     "content": "Which roles are part of the workshop phase?"
