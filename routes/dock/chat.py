@@ -30,8 +30,8 @@ def ask_claude(user):
             'question': question
         }
         
-        answer = execute_prompt('claude', prompt_data)
-        
+        answer = execute_prompt('chatgpt', prompt_data)
+
         save_prompt_history(prompt_data['url'], prompt_data, question, answer, user['id'])
 
         return jsonify({"answer": answer})
