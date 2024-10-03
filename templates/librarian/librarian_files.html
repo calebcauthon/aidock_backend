@@ -42,11 +42,11 @@
 
 <div class="flex-1 p-8" ng-app="fileApp" ng-controller="FileController">
     <div class="flex justify-between items-center mb-8">
-        <h2 class="text-2xl font-bold mb-6">Files</h2>
+        <h2 class="text-2xl font-bold mb-6">Files | [[librarian['organization_name']]]</h2>
         <div class="flex items-center space-x-4">
             <div class="flex items-center space-x-2">
-                <span>[[librarian['username']]] | [[organization['name']]]</span>
-                <a href="[[ url_for('auth_admin.logout') ]]" class="text-blue-500 hover:text-blue-700">Logout</a>
+                <span>[[ librarian['username'] ]] | [[organization['name']]]</span>
+                <a href="[[ url_for('auth.logout') ]]" class="text-blue-500 hover:text-blue-700">Logout</a>
             </div>
         </div>
     </div>
@@ -90,6 +90,7 @@
                 <h3 class="text-lg leading-6 font-medium text-gray-900" id="previewFileName"></h3>
                 <div class="mt-2 px-7 py-3">
                     <pre id="fileContent" class="text-sm text-gray-500 whitespace-pre-wrap break-words max-h-96 overflow-y-auto"></pre>
+                    <img id="imagePreview" class="max-w-full h-auto mx-auto" style="display: none;" alt="Image preview">
                 </div>
                 <div class="items-center px-4 py-3">
                     <button id="closePreview" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
@@ -152,7 +153,21 @@
                     $http.get('/librarian/preview_file/' + fileId)
                         .then(function(response) {
                             document.getElementById('previewFileName').textContent = response.data.name;
-                            document.getElementById('fileContent').textContent = response.data.content;
+                            const fileContent = document.getElementById('fileContent');
+                            const imagePreview = document.getElementById('imagePreview');
+                            
+                            if (response.data.mime_type && response.data.mime_type.startsWith('image/')) {
+                                // Show image preview for image files
+                                fileContent.style.display = 'none';
+                                imagePreview.style.display = 'block';
+                                imagePreview.src = 'data:' + response.data.mime_type + ';base64,' + response.data.content;
+                            } else {
+                                // Show text content for other file types
+                                fileContent.style.display = 'block';
+                                imagePreview.style.display = 'none';
+                                fileContent.textContent = response.data.content;
+                            }
+                            
                             document.getElementById('filePreviewOverlay').style.display = 'block';
                         }, function(error) {
                             console.error('Error previewing file:', error);

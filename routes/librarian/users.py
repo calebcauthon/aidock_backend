@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
-from routes_auth_helpers import librarian_required
+from routes.shared.auth import librarian_required
 from db.user_model import UserModel
 from db.organization_model import OrganizationModel
 
@@ -16,10 +16,8 @@ def librarian_users(librarian):
 @librarian_required
 def create_user(librarian):
     if request.method == 'POST':
-        # Add user creation logic here
         UserModel.create_user(
             username=request.form['username'],
-            email=request.form['email'],
             password=request.form['password'],
             role=request.form['role'],
             organization_id=librarian['organization_id']
@@ -35,11 +33,9 @@ def edit_user(librarian, user_id):
         return jsonify({'error': 'Unauthorized'}), 403
     
     if request.method == 'POST':
-        # Add user update logic here
         update_data = {
             'user_id': user_id,
             'username': request.form['username'],
-            'email': request.form['email'],
             'role': request.form['role']
         }
         

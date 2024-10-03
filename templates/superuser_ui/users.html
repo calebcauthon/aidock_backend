@@ -2,13 +2,12 @@
 
 {% block content %}
     <h1>User List</h1>
-    <a href="/users/create" class="button">Create New User</a>
+    <a href="/users/create" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Create New User</a>
 
     <table>
         <tr>
             <th>ID</th>
             <th>Username</th>
-            <th>Email</th>
             <th>Role</th>
             <th>Organization ID</th>
             <th>Actions</th>
@@ -18,7 +17,6 @@
         <tr>
             <td>[[ user.id ]]</td>
             <td>[[ user.username ]]</td>
-            <td>[[ user.email ]]</td>
             <td>[[ user.role ]]</td>
             <td>[[ user.organization_id ]]</td>
             <td>

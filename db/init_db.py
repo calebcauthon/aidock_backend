@@ -36,15 +36,6 @@ def create_table(conn):
 
     try:
         cur = conn.cursor()
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS context_docs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                url TEXT NOT NULL,
-                document_name TEXT NOT NULL,
-                document_text TEXT NOT NULL,
-                organization_id INTEGER NOT NULL
-            )
-        """)
         
         # Create prompt_history table
         cur.execute("""
@@ -59,14 +50,13 @@ def create_table(conn):
         """)
 
         conn.commit()
-        print(f"Prompt history and context docs table possibly created")
+        print(f"Prompt history table possibly created")
         
         # Create users table
         cur.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT NOT NULL UNIQUE,
-                email TEXT NOT NULL UNIQUE,
                 password_hash TEXT NOT NULL,
                 role TEXT NOT NULL,
                 login_token TEXT,
@@ -114,6 +104,45 @@ def create_table(conn):
         """)
         conn.commit()
         print("Organization websites table possibly created")
+
+        # Create user_websites table
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS user_websites (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                website_url TEXT NOT NULL,
+                is_active BOOLEAN DEFAULT TRUE,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        """)
+        conn.commit()
+        print("User websites table possibly created")
+
+        # Create organization_settings table
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS organization_settings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                organization_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                value TEXT,
+                FOREIGN KEY (organization_id) REFERENCES organizations (id),
+                UNIQUE (organization_id, name)
+            )
+        """)
+        conn.commit()
+        print("Organization settings table possibly created")
+
+        # Create default_settings table
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS default_settings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE,
+                default_value TEXT,
+                description TEXT
+            )
+        """)
+        conn.commit()
+        print("Default settings table possibly created")
 
         cur.close()
     except (sqlite3.Error, psycopg2.Error) as e:

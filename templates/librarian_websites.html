@@ -1,0 +1,103 @@
+{% extends "base_librarian.html" %}
+
+
+{% block content %}
+
+<div class="flex-1 p-8">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-bold mb-6">Websites | [[librarian_user['organization_name']]]</h2>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <span>[[ librarian_user['username'] ]] | [[librarian_user['organization_name']]]</span>
+                <a href="[[ url_for('auth.logout') ]]" class="text-blue-500 hover:text-blue-700">Logout</a>
+            </div>
+        </div>
+    </div>
+
+  <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">Enable KTDock for a Website</h2>
+      <form id="addWebsiteForm" class="flex items-center">
+          <input type="text" id="newWebsiteUrl" placeholder="Enter Website URL" class="flex-grow mr-2 p-2 border rounded" required>
+          <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add Website</button>
+      </form>
+  </div>
+
+  <div class="bg-white shadow-md rounded-lg p-6">
+      <h2 class="text-xl font-semibold mb-4">KTDock-enabled Websites</h2>
+      <p class="text-sm text-gray-500 mb-2">If the URL contains:</p>
+      <ul id="websiteList" class="space-y-4">
+          {% for website in websites %}
+          <li class="flex items-center justify-between">
+              <span class="text-lg">[[ website['url'] ]]</span>
+              <button class="remove-website text-red-500 hover:text-red-700" data-website-url="[[ website['url'] ]]">Remove</button>
+          </li>
+          {% endfor %}
+          {% if not websites %}
+          <li>
+              <em class="text-gray-400">No organization websites added yet</em>
+          </li>
+          {% endif %}
+      </ul>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add new website
+    const addWebsiteForm = document.getElementById('addWebsiteForm');
+    addWebsiteForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const websiteUrl = document.getElementById('newWebsiteUrl').value;
+        fetch('/api/librarian/websites/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Login-Token': '[[ librarian_user['login_token'] ]]'
+            },
+            body: JSON.stringify({ website_url: websiteUrl }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload(); // Reload the page to show the new website
+            } else {
+                alert('Failed to add website');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while adding the website');
+        });
+    });
+
+    // Remove website
+    const removeButtons = document.querySelectorAll('.remove-website');
+    removeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const websiteUrl = this.dataset.websiteUrl;
+            if (confirm('Are you sure you want to remove this website?')) {
+                fetch('/api/librarian/websites/remove', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Login-Token': '[[ librarian_user['login_token'] ]]'
+                    },
+                    body: JSON.stringify({ website_url: websiteUrl }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload(); // Reload the page to update the website list
+                    } else {
+                        alert('Failed to remove website');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while removing the website');
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

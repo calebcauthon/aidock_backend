@@ -32,4 +32,5 @@ def prompt_claude(prompt_data, max_tokens=1000, model="claude-3-sonnet-20240229"
         )
         return response.content[0].text
     except Exception as e:
-        raise Exception(f"Error prompting Claude: {str(e)}")
+        print(f"Error prompting Claude: {str(e)}")
+        raise e

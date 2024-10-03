@@ -1,7 +1,7 @@
 import re
-from typing import List
-from routes_context_docs_for_platform_admin import create_connection
-from db.init_db import execute_sql
+from typing import List, Dict
+from db.init_db import execute_sql, create_connection
+import base64
 
 def get_relevant_context_docs(organization_id: int, url: str) -> List[str]:
     conn = create_connection()
@@ -25,14 +25,22 @@ def get_relevant_context_docs(organization_id: int, url: str) -> List[str]:
     ]
     return relevant_docs if relevant_docs else []
 
-
-class ContextDocModel:
-    @staticmethod
-    def add_context_doc(organization_id: int, url: str, document_name: str, document_text: str):
-        conn = create_connection()
-        query = """
-        INSERT INTO context_docs (organization_id, url, document_name, document_text)
-        VALUES (?, ?, ?, ?)
-        """
-        execute_sql(conn, query, (organization_id, url, document_name, document_text))
-        conn.close()
+def get_relevant_images(organization_id: int, url: str) -> List[Dict[str, str]]:
+    conn = create_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT file_name, binary_content
+        FROM files 
+        WHERE organization_id = ? AND file_name LIKE '%.png' OR file_name LIKE '%.jpg' OR file_name LIKE '%.jpeg'
+    """, (organization_id,))
+    rows = cur.fetchall()
+    conn.close()
+    
+    relevant_images = [
+        {
+            "document_name": row[0],
+            "image_base64": base64.b64encode(row[1]).decode('utf-8')
+        }
+        for row in rows
+    ]
+    return relevant_images if relevant_images else []

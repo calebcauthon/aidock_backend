@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>[[ title ]] - AI Dock PlatformAdmin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -124,9 +125,10 @@
         <ul>
             <li><a href="[[ url_for('organization_routes.list_organizations') ]]">🏢 Organizations</a></li>
             <li><a href="[[ url_for('user_routes.list_users') ]]">👤 Users</a></li>
-            <li><a href="[[ url_for('platform_admin_pages.prompt_history') ]]">📜 Prompt History</a></li>
+            <li><a href="[[ url_for('history.prompt_history') ]]">📜 Prompt History</a></li>
             <li><a href="[[ url_for('files.list_files') ]]">📁 Files</a></li>
-            <li><a href="[[ url_for('auth_admin.logout') ]]">❌ Logout</a></li>
+            <li><a href="[[ url_for('admin_settings.settings_page') ]]">⚙️ Settings</a></li>
+            <li><a href="[[ url_for('auth.logout') ]]">❌ Logout</a></li>
         </ul>
     </div>
     <div class="content">
